@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .card{
+    height: 400px;
+    width:300px;
+    margin: 15px;
+    padding-top: 10px;
+  }
+  .card img{
+    height: 300px;
+    width:300px;
+    object-fit: contain;
+  }
+  .hello{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  </style>
+</head>
+<body>
+  
+</body>
+</html>
+{% extends 'layouts.html' %}
+
+    {% load static %}
+
+    {%block title%}
+        <title>Home</title>
+    {%endblock%}
+
+{% block main-content %}
+{% include 'users/header.html' %}
+
+<!--start of product section-->
+
+<div class="container-fluid mt-5">
+  <h1>Accessories</h1>
+<div class="row row-cols-1 row-cols-md-4 g-4">
+  
+  <div class="col ">
+    <div class="card d-flex">
+      <img src="{% static 'images/p2.webp' %}" class="card-img-top" alt="{{item.product_name}}">
+      <div class="card-body">
+        <h5 class="card-title">Vintage Inspired Classic</h5>
+        <h3>$83.21</h3>
+        <a href="/productdetail/2"><button class="btn btn-primary">View Details</button></a>
+      </div>
+    </div>
+    <div class="card d-flex">
+        <img src="{% static 'images/p5.webp' %}" class="card-img-top" alt="{{item.product_name}}">
+        <div class="card-body">
+          <h5 class="card-title">Classic Brown Belt</h5>
+          <h3>$59.74</h3>
+          <a href="/productdetail/5"><button class="btn btn-primary">View Details</button></a>
+        </div>
+      </div>
+      <div class="card d-flex">
+        <img src="{% static 'images/p10.webp' %}" class="card-img-top" alt="{{item.product_name}}">
+        <div class="card-body">
+          <h5 class="card-title">Mini Silver Mesh Watch</h5>
+          <h3>$14.91</h3>
+          <a href="/productdetail/10"><button class="btn btn-primary">View Details</button></a>
+        </div>
+      </div>
+  </div>
+  
+</div> 
+</div>
+<!--end of product section-->
+{% include 'users/footer.html' %}
+
+{% endblock %}

@@ -1,0 +1,64 @@
+.pro {
+    width: 100%;
+    height: 50%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .pro img {
+    height: 300px;
+    border: 1px black solid;
+    position: relative;
+    object-fit: contain;
+  }
+  
+  .spr1,
+  .spr2,
+  .spr3 {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .spring {
+    position: absolute;
+    font-size: larger;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.7);
+    padding: 10px;
+  }
+  
+  .mid {
+    height: 350px;
+    padding: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-evenly;
+    background-color: #F1F1F2;
+  }
+  
+  .mid-1 {
+    width: 25%;
+  }
+  
+  .mid-2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .mid-2 svg {
+    width: 60px;
+    height: 50px;
+    font-size: 3rem;
+  }
+  
+  .mid-1 > p,
+  .mid-1 > h4 {
+    text-align: center;
+  }

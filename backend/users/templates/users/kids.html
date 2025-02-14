@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .card{
+    height: 400px;
+    width:300px;
+    margin: 15px;
+    padding-top: 10px;
+  }
+  .card img{
+    height: 300px;
+    width:300px;
+    object-fit: contain;
+  }
+  .hello{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  </style>
+</head>
+<body>
+  
+</body>
+</html>
+{% extends 'layouts.html' %}
+
+    {% load static %}
+
+    {%block title%}
+        <title>Home</title>
+    {%endblock%}
+
+{% block main-content %}
+{% include 'users/header.html' %}
+
+<!--start of product section-->
+
+<div class="container-fluid mt-5">
+  <h1>Kids</h1>
+<div class="row row-cols-1 row-cols-md-4 g-4">
+  
+  <div class="col ">
+    <div class="card d-flex">
+      <img src="{% static 'images/dun..avif' %}" class="card-img-top" alt="{{item.product_name}}">
+      <div class="card-body">
+        <h5 class="card-title">Dungarees</h5>
+        <h3>$14.0</h3>
+        <a href="/productdetail/12"><button class="btn btn-primary">View Details</button></a>
+      </div>
+    </div>
+  </div>
+  
+</div> 
+</div>
+<!--end of product section-->
+{% include 'users/footer.html' %}
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'layouts.html' %}
+
+    {% load static %}
+
+    {%block title%}
+        <title>Ecommerce Product Details</title>
+    {%endblock%}
+
+{% block main-content %}
+{% include 'users/header.html' %}
+
+<!--start of product section-->
+<div class="container my-3">
+    <div class="row d-flex justify-content-between align-items-center">
+        <div class="col-md-3">
+            <img src="/{{product.product_image}}" alt="{{product.product_name}}" width="400px">
+        </div>
+        <div class="col-md-8">
+            <h1>{{product.product_name}}</h1>
+            <h3 class="text-success">$ {{product.product_price}}</h3>
+            <strong>Available stock: {{product.stock}}</strong> <br>
+            <strong>Category:{{product.category}}</strong> <br>
+            <p>{{product.product_description}}</p>
+            <div class="my-3">
+                <a href="/addtocart/{{product.id}}" class="btn btn-warning">Add to Cart</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end of product section-->
+{% include 'users/footer.html' %}
+
+{% endblock %}
