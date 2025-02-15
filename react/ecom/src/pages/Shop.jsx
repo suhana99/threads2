@@ -3,6 +3,7 @@ import { faBookOpen, faGift, faHouseChimney } from '@fortawesome/free-solid-svg-
 import React from 'react';
 import '../styles/shop.css';
 import { Col, Row } from 'reactstrap';
+import ProductDetails from './ProductDetails';
 
 const Shop = () => {
     return (
@@ -70,6 +71,7 @@ const Shop = () => {
             </div>
           </section>
         </div>
+        <ProductDetails/>
       </>
     );
 };

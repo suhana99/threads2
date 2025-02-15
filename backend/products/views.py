@@ -28,10 +28,16 @@ class ProductListView(generics.ListAPIView):
     filter_backends = [SearchFilter,OrderingFilter,DjangoFilterBackend]
     filterset_class=ProductFilter
     search_fields = ['id','max_price','min_price','category'] 
+    print("list",Product.objects.all())
+
 
 class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+    def get(self, request, *args, **kwargs):
+        print("Fetching product:", kwargs['pk'])
+        return super().get(request, *args, **kwargs)
 
 class CreateProductView(generics.CreateAPIView):
     queryset = Product.objects.all()
