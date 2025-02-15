@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from .forms import LoginForm
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 def register_user(request):
@@ -21,6 +22,7 @@ def register_user(request):
     }
     return render(request,'accounts/register.html',context)
 
+@csrf_exempt
 def login_form(request):
     if request.method=='POST':
         form=LoginForm(request.POST)
