@@ -5,6 +5,40 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from .forms import LoginForm
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+
+@csrf_exempt
+def api_login(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            username = data.get("username")
+            password = data.get("password")
+
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_staff:
+                    return JsonResponse({"error": "Admins cannot log in from the frontend"}, status=403)
+                
+                login(request, user)
+                return JsonResponse({
+                    "message": "Login successful",
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                        "is_admin": user.is_staff
+                    }
+                }, status=200)
+            else:
+                return JsonResponse({"error": "Invalid credentials"}, status=401)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+
+    return JsonResponse({"error": "Only POST method allowed"}, status=405)
+
 
 # Create your views here.
 def register_user(request):
