@@ -3,7 +3,8 @@ import { faBookOpen, faGift, faHouseChimney } from '@fortawesome/free-solid-svg-
 import React from 'react';
 import '../styles/shop.css';
 import { Col, Row } from 'reactstrap';
-import { ProductList } from './ProductDetails';
+import Products from './Products';
+
 
 const Shop = () => {
     return (
@@ -71,7 +72,7 @@ const Shop = () => {
             </div>
           </section>
         </div>
-        <ProductList/>
+        <Products/>
       </>
     );
 };
