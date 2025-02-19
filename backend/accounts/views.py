@@ -9,6 +9,27 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
+@csrf_exempt
+def api_register(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse JSON data from frontend
+            form = UserCreationForm({
+                "username": data.get("username"),
+                "password1": data.get("password1"),
+                "password2": data.get("password2"),
+            })
+
+            if form.is_valid():
+                form.save()
+                return JsonResponse({"message": "Account Created Successfully!"}, status=200)
+            else:
+                return JsonResponse({"error": form.errors}, status=400)  # Return form errors
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 @csrf_exempt
 def api_login(request):
