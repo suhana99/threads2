@@ -1,4 +1,4 @@
-.login__form {
+.register__form {
     padding: 50px;
     background: white;
     position: relative;
@@ -10,14 +10,14 @@
     text-align: center;
 }
 
-.login__container {
+.register__container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh; 
 }
 
-.login__form input {
+.register__form input {
     width: 100%;
     padding: 8px;
     border-radius: 5px;
@@ -25,7 +25,7 @@
     font-size: 1rem;
 }
 
-.login__form input:focus {
+.register__form input:focus {
     border-color: #ffa500;
     outline: none;
 }

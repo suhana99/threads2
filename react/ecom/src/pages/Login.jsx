@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import '../styles/login.css';
-import { Container, Row, Col, Form, FormGroup, Button } from 'reactstrap';
+import {Form, FormGroup, Button } from 'reactstrap';
 import userIcon from '../assets/images/user.png';
 
 const Login = () => {
@@ -21,6 +21,7 @@ const Login = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
+        credentials: "include", 
       });
 
       const data = await response.json();
@@ -41,47 +42,39 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-        <Container className='border-1px'>
-            <Row>
-               <Col lg='8' className='m-auto'>
-                <div className="login__form my-5">
-                            <div className="user d-flex">
-                                <img src={userIcon} alt="User Icon" />
-                                <h2 className="mt-4">Login</h2>
-                            </div>
-                            
-                        <Form onSubmit={handleLogin} className="space-y-4">
-                        <FormGroup>
-                            <label className="block text-sm font-medium">Username</label>
-                            <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                            />
-                        </FormGroup>
-                        <FormGroup>
-                            <label className="block text-sm font-medium">Password</label>
-                            <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            />
-                        </FormGroup>
-                        <Button className="btn secondary__btn auth__btn" type="submit">
-                                Login
-                        </Button>
-                        </Form>
-                    </div>
-                </Col>
-            </Row>
-           </Container> 
-      </div>
+    <div className="login__container">
+    <div className="login__form">
+        <div className="user">
+            <img src={userIcon} alt="User Icon" />
+            <h2 className="mb-5">Login</h2>
+        </div>
+
+        <Form onSubmit={handleLogin} className="space-y-4">
+            <FormGroup>
+                <label className="block text-sm font-medium">Username</label>
+                <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                />
+            </FormGroup>
+
+            <FormGroup>
+                <label className="block text-sm font-medium">Password</label>
+                <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+            </FormGroup>
+
+            <Button className="auth__btn" type="submit">Login</Button>
+        </Form>
     </div>
+</div>
+
   );
 };
 
