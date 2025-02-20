@@ -6,6 +6,7 @@ import Products from '../pages/Products'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
 import SearchResultList from '../shared/SearchResultList'
+import CategoryPage from '../pages/CategoryPage'
 
 const Routers = () =>{
     return(
@@ -16,6 +17,7 @@ const Routers = () =>{
             <Route path='/login' element={<Login/>}/>
             <Route path='/register' element={<Register/>}/>
             <Route path='/products/search' element={<SearchResultList/>} />
+            <Route path="/category/:id" element={<CategoryPage />} />
         </Routes>
     )
 }
