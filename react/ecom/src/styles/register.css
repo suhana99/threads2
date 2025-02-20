@@ -1,8 +1,10 @@
+
 .register__form {
-    padding: 50px;
+    padding: 5px 50px;
     background: white;
     position: relative;
     width: 100%;
+    margin-top: 120px;
     max-width: 400px;
     border: 2px solid #ccc; 
     border-radius: 10px;
@@ -14,7 +16,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; 
+    height: 85vh; 
 }
 
 .register__form input {

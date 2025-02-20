@@ -55,6 +55,7 @@ const Register = () => {
     
 
     return (
+        <>
         <div className="register__container">
             <div className="register__form">
                 <div className="user">
@@ -100,6 +101,8 @@ const Register = () => {
                 </p>
             </div>
         </div>
+        <div> </div>
+        </>
     );
 };
 

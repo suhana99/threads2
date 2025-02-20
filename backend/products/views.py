@@ -23,12 +23,12 @@ class ProductPagination(PageNumberPagination):
 
 
 class ProductListView(generics.ListAPIView):
-    queryset = Product.objects.filter(stock__gt=1)
+    queryset = Product.objects.filter(stock__gt=0)
     serializer_class = ProductSerializer
-    filter_backends = [SearchFilter,OrderingFilter,DjangoFilterBackend]
-    filterset_class=ProductFilter
-    search_fields = ['id','max_price','min_price','category'] 
-    print("list",Product.objects.all())
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ProductFilter
+    search_fields = ['product_name', 'product_description','category__category_name']
+
 
 
 class ProductDetailView(generics.RetrieveAPIView):
