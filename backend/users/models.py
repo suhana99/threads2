@@ -16,9 +16,9 @@ class Order(models.Model):
         ('Esewa','Esewa'), #one for user, one for database
         ('Stripe','Stripe')
     )
-    product=models.ForeignKey(Product,on_delete=models.CASCADE)
+    # product=models.ForeignKey(Product,on_delete=models.CASCADE)
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    quantity=models.IntegerField()
+    # quantity=models.IntegerField()
     total_price=models.IntegerField()
     delivery_status=models.CharField(default='Pending', max_length=100)
     payment_method=models.CharField(max_length=100,choices=PAYMENT)
@@ -26,4 +26,21 @@ class Order(models.Model):
     contact_no=models.CharField(validators=[MinLengthValidator(9),MaxLengthValidator(10)], max_length=10)
     address=models.CharField(max_length=200)
     created_date=models.DateTimeField(auto_now_add=True)
+
+class OrderItem(models.Model):
+    SIZE_CHOICES = [
+        ('XS', 'Extra Small'),
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'Extra Large')
+    ]
+
+    order = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    size = models.CharField(max_length=2, choices=SIZE_CHOICES)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.product_name} ({self.size})"
 

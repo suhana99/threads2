@@ -88,9 +88,9 @@ def order_form(request,product_id,cart_id):
     if request.method=="POST":
         form=OrderForm(request.POST)
         if form.is_valid():
-            quantity=request.POST.get('quantity')
+            # quantity=request.POST.get('quantity')
             price=product.product_price
-            total_price=int(quantity)*int(price)
+            # total_price=int(quantity)*int(price)
             contact_no=request.POST.get('contact_no')
             address=request.POST.get('address')
             payment_method=request.POST.get('payment_method')
@@ -101,8 +101,8 @@ def order_form(request,product_id,cart_id):
             order=Order.objects.create(
                 product=product,
                 user=user,
-                quantity=quantity,
-                total_price=total_price,
+                # quantity=quantity,
+                # total_price=total_price,
                 contact_no=contact_no,
                 payment_method=payment_method,
                 payment_status=payment_status
