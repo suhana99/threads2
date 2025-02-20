@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBookOpen, faGift, faHouseChimney } from '@fortawesome/free-solid-svg-icons';
+import { Carousel } from "react-bootstrap"; 
 import React from 'react';
 import '../styles/shop.css';
 import { Col, Row } from 'reactstrap';
@@ -9,9 +10,48 @@ import Products from './Products';
 const Shop = () => {
     return (
       <>
+      {/* Carousel Section */}
+      <Carousel fade interval={3000} className="shop-carousel mx-auto" style={{ maxWidth: "90%", maxHeight:"50%" }}>
+
+        <Carousel.Item>
+          <img
+            className="d-block w-100"
+            src={require('../assets/images/a.avif')}
+            alt="First slide"
+          />
+          <Carousel.Caption>
+            <h3>Women's Fashion</h3>
+            <p>Explore the latest trends for women</p>
+          </Carousel.Caption>
+        </Carousel.Item>
+
+        <Carousel.Item>
+          <img
+            className="d-block w-100"
+            src={require('../assets/images/c.webp')}
+            alt="Second slide"
+          />
+          <Carousel.Caption>
+            <h3>Men's Collection</h3>
+            <p>Find stylish outfits for men</p>
+          </Carousel.Caption>
+        </Carousel.Item>
+
+        <Carousel.Item>
+          <img
+            className="d-block w-100"
+            src={require('../assets/images/c.jpeg')}
+            alt="Third slide"
+          />
+          <Carousel.Caption>
+            <h3>Accessories</h3>
+            <p>New trends to complete your style</p>
+          </Carousel.Caption>
+        </Carousel.Item>
+      </Carousel>
         <Row>
         <Col xs={12} lg={12} md={12}>
-            <h1 className="text-center">Shop With Us</h1>
+            <h1 className="text-center" style={{marginTop:"30px"}}>Shop With Us</h1>
             <p className="text-center">Handpicked Favourites just for you</p>
         </Col>
         </Row>
