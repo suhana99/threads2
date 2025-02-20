@@ -19,4 +19,5 @@ urlpatterns = [
     path('products/recommend/',ProductDetailAPIView.as_view(),name='product_filter'),
     path('products/<int:product_id>/reviews/', ReviewListCreateView.as_view(), name='review-list-create'),
     path('products/<int:product_id>/reviews/<int:pk>/', ReviewDetailView.as_view(), name='product-reviews-detail'),
+    path('products/categories/', CategoryListView.as_view(), name='category-list'),
 ]
