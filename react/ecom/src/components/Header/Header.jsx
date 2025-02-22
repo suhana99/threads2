@@ -25,7 +25,7 @@ const Header = () => {
    useEffect(() => {
       const fetchCategories = async () => {
          try {
-            const response = await fetch('http://127.0.0.1:8000/products/products/categories/'); //categories
+            const response = await fetch('http://127.0.0.1:8000/products/products/categories/'); 
             console.log("response",response)
             if (response.ok) {
                const data = await response.json();
