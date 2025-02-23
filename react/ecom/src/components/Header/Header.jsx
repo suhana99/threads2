@@ -18,6 +18,7 @@ const Header = () => {
       { path: '/products', display: 'Products' },
    ];
 
+   
    if (user) {
       nav__links.push({ path: '/history', display: 'History' });
    }
@@ -83,8 +84,18 @@ const Header = () => {
                         ))}
                         {/* Categories Dropdown */}
                         <li className="nav__item">
-                           <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
-                              <DropdownToggle caret className="category-dropdown">
+                           <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown} >
+                              <DropdownToggle caret className="category-dropdown" style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--heading-color)', // Fixed placement of color
+                                  boxShadow: 'none',
+                                  display: 'inline',
+                                  cursor: 'pointer',
+                                  textDecoration: 'none',
+                                  fontWeight: 500,
+                                  fontSize: '1.5rem',
+                                  marginBottom:'5px'}}>
                                  Categories
                               </DropdownToggle>
                               <DropdownMenu>

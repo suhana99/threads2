@@ -37,8 +37,10 @@ const CategoryPage = () => {
 
    return (
       <Container>
+                     <h4 style={{margin:"30px 0px 30px 0px", display:"flex" ,justifyContent:"center", color:'rgb(120,80,90)'}}>Category: {filteredProducts.length > 0 ? filteredProducts[0]?.category_name : "Unknown"}</h4>
+
          <Row>
-            {
+            {  
                filteredProducts.length === 0
                   ? <h4 className='text-center'>No Products Found</h4>
                   : filteredProducts.map((product) => (
