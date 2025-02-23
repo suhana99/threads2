@@ -7,8 +7,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model=Category
         fields='__all__'
 
-
-
 class ReviewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     class Meta:
