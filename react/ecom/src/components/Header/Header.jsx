@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useContext, useState } from 'react';
-import { Container, Row, Button } from 'reactstrap';
+import { Container, Row, Button, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { NavLink, useNavigate } from 'react-router-dom';
 import './header.css';
 import { AuthContext } from '../../context/AuthContext';
@@ -10,19 +10,34 @@ const Header = () => {
    const menuRef = useRef(null);
    const navigate = useNavigate();
    const { user } = useContext(AuthContext);
-   const [searchQuery, setSearchQuery] = useState('');
+   const [categories, setCategories] = useState([]);
+   const [dropdownOpen, setDropdownOpen] = useState(false);
 
    const nav__links = [
       { path: '/', display: 'Home' },
       { path: '/products', display: 'Products' },
-      { path: '/category', display: 'Categories' },
    ];
 
    if (user) {
       nav__links.push({ path: '/history', display: 'History' });
    }
 
-   // ✅ Define sticky header function
+   useEffect(() => {
+      const fetchCategories = async () => {
+         try {
+            const response = await fetch('http://127.0.0.1:8000/products/products/categories/'); 
+            console.log("response",response)
+            if (response.ok) {
+               const data = await response.json();
+               setCategories(data);
+            }
+         } catch (error) {
+            console.error("Error fetching categories:", error);
+         }
+      };
+      fetchCategories();
+   }, []);
+
    const stickyHeaderFunc = () => {
       window.addEventListener('scroll', () => {
          if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
@@ -39,8 +54,8 @@ const Header = () => {
    }, []);
 
    const toggleMenu = () => menuRef.current.classList.toggle('show__menu');
+   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
-   // ✅ Define logout function
    const logout = () => {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
@@ -66,6 +81,21 @@ const Header = () => {
                               </NavLink>
                            </li>
                         ))}
+                        {/* Categories Dropdown */}
+                        <li className="nav__item">
+                           <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
+                              <DropdownToggle caret className="category-dropdown">
+                                 Categories
+                              </DropdownToggle>
+                              <DropdownMenu>
+                                 {categories.map((category, index) => (
+                                    <DropdownItem key={index} onClick={() => navigate(`/category/${category.id}`)}>
+                                       {category.category_name}
+                                    </DropdownItem>
+                                 ))}
+                              </DropdownMenu>
+                           </Dropdown>
+                        </li>
                      </ul>
                   </div>
 

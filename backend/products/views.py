@@ -16,6 +16,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser,IsAuthenticatedOrReadOnly
 
 
+class CategoryListView(APIView):
+    def get(self, request):
+        categories = Category.objects.all()
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class ProductPagination(PageNumberPagination):
     page_size = 4  # Number of items per page
     page_size_query_param = 'page_size'  # Allow clients to set the page size via query parameter
