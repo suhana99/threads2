@@ -72,6 +72,29 @@ def show_cart_items(request):
     }
     return render(request,'users/cart.html',context)
 
+from django.http import JsonResponse
+
+@login_required
+def show_cart_items_front(request):
+    user = request.user
+    items = Cart.objects.filter(user=user)
+
+    cart_items = [
+        {
+            "id": item.id,
+            "product": {
+                "id": item.product.id,
+                "product_name": item.product.product_name,
+                "product_image": item.product.product_image.url if item.product.product_image else None,
+                "product_price": item.product.product_price,
+            },
+        }
+        for item in items
+    ]
+
+    return JsonResponse({"items": cart_items})
+
+
 @login_required
 def remove_cart_item(request, cart_id):
     item=Cart.objects.get(id=cart_id)
