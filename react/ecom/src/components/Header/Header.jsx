@@ -100,7 +100,7 @@ const Header = () => {
                               </DropdownToggle>
                               <DropdownMenu>
                                  {categories.map((category, index) => (
-                                    <DropdownItem key={index} onClick={() => navigate(`/category/${category.id}`)}>
+                                    <DropdownItem key={index} onClick={() => navigate(`/category/${category.id}`)} >
                                        {category.category_name}
                                     </DropdownItem>
                                  ))}

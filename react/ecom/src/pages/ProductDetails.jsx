@@ -1,62 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardBody, Container, Row, Col, Form, ListGroup } from 'reactstrap';
+import { Card, CardBody, Container, Row, Col, Button} from 'reactstrap';
+import { getCsrfToken } from "../utils/csrf";
 import { Link} from 'react-router-dom';
 import '../styles/productcard.css'
 import '../styles/product-details.css'
 
-// const ProductList = () => {
-//   const [products, setProducts] = useState([]);
 
-//   useEffect(() => {
-//     axios.get("http://127.0.0.1:8000/products/products/")
-//       .then(response => setProducts(response.data))
-//       .catch(error => console.error(error));
-//   }, []);
-//   console.log("print",products)
-//   return (
-//     <div>
-//       <h2>Product List</h2>
-//       <ul>
-//         {products.map(product => (
-//         <Link to={`/products/${product.id}`} style={{ textDecoration: "none"}}> 
-//          <Card>
-//           <div className="product__img">
-//             <img src={product.product_image} style={{maxHeight:"250px",minHeight:"250px"}}/>
-//           </div>
-  
-//           <CardBody>
-//             <h5 className='product__title'>
-//               {product.product_name}
-//             </h5>
-
-//             <div className="card__top d-flex align-items-center justify-content-between">
-//               <span className="product__location d-flex align-items-center gap-1">
-//                Category :  {product.category_name}
-//               </span>
-//             </div>
-  
-            
-//             <p className='product__description' style={{maxHeight:"60px",minHeight:"60px"}}>{product.product_description}</p> {/* Displaying description */}
-//             <div className="card__details d-flex justify-content-between mt-2">
-//               <span>Stock: {product.stock}</span>
-//             </div>
-  
-//             <div className="card__bottom d-flex align-items-center justify-content-between mt-3">
-//               <h5>${product.product_price} <span></span></h5>
-//               <Link to={`/products/${product.id}`}>
-//                 <button className='booking__btn'>View details</button> {/* Book Now button */}
-//               </Link>
-//             </div>
-//           </CardBody>
-//         </Card>
-//         </Link>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// };
 
 const ProductCard = ({ product }) => {
   return (
@@ -79,7 +30,7 @@ const ProductCard = ({ product }) => {
             </span>
           </div>
 
-          <p className="product__description" style={{ maxHeight: "150px", minHeight: "150px" }}>
+          <p className="product__description mb-4" style={{ maxHeight: "100px", minHeight: "100px" }}>
             {product.product_description}
           </p>
 
@@ -105,12 +56,42 @@ const ProductCard = ({ product }) => {
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     axios.get(`http://127.0.0.1:8000/products/products/${id}/`)
       .then(response => setProduct(response.data))
       .catch(error => console.error(error));
   }, [id]);
+
+  const handleAddToCart = async () => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/addtocart/${id}/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCsrfToken(), // CSRF token for security
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setMessage("Product added to cart!");
+      } else {
+        setMessage("Product is already in the cart.");
+      }
+    } catch (error) {
+      setMessage("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   if (!product) return <p>Loading...</p>;
 
@@ -141,7 +122,14 @@ const ProductDetail = () => {
               <h6>Price: ${product.product_price}</h6>
               <h6>Available stock: {product.stock}</h6>
             </div>
+            <Button color="primary" onClick={handleAddToCart} disabled={loading}>
+              {loading ? "Adding..." : "🛒 Add to Cart"}
+            </Button>
+
+            {/* Message Display */}
+            {message && <p>{message}</p>}
           </div>
+           
         </Col>
       </Row>
     </Container>

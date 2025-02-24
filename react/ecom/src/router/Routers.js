@@ -7,6 +7,7 @@ import Login from '../pages/Login'
 import Register from '../pages/Register'
 import SearchResultList from '../shared/SearchResultList'
 import CategoryPage from '../pages/CategoryPage'
+import Cart from '../pages/Cart'
 
 const Routers = () =>{
     return(
@@ -18,6 +19,7 @@ const Routers = () =>{
             <Route path='/register' element={<Register/>}/>
             <Route path='/products/search' element={<SearchResultList/>} />
             <Route path="/category/:id" element={<CategoryPage />} />
+            <Route path="/cart" element={<Cart/>} />
         </Routes>
     )
 }
