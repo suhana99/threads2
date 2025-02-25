@@ -38,21 +38,33 @@ const Cart = () => {
       });
   }, []);
 
-  // Remove a single item
   const handleRemoveItem = async (cartId) => {
+    console.log("Remove clicked for cartId:", cartId); // Check if the function runs
+  
     try {
       const token = localStorage.getItem("access_token");
-      await axios.delete(`http://127.0.0.1:8000/cart/${cartId}/`, {
+      if (!token) {
+        console.error("No token found.");
+        return;
+      }
+  
+      const response = await axios.delete(`http://127.0.0.1:8000/carts/${cartId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      setMessage("Item removed successfully!");
-      setCartItems(cartItems.filter((item) => item.id !== cartId));
+  
+      console.log("Response status:", response.status); // Log API response
+  
+      if (response.status === 204 || response.status === 200) {
+        console.log("Item removed successfully");
+        setCartItems(cartItems.filter((item) => item.id !== cartId));
+      } else {
+        console.error("Unexpected response:", response);
+      }
     } catch (error) {
-      console.error("Error removing item:", error);
-      setMessage("Failed to remove item. Try again.");
+      console.error("Error removing item:", error.response?.data || error.message);
     }
   };
+  
 
   // Handle checkbox selection
   const handleCheckboxChange = (id) => {

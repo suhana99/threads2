@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Card, CardBody, Container, Row, Col, Button} from 'reactstrap';
 import { getCsrfToken } from "../utils/csrf";
-import { Link} from 'react-router-dom';
 import '../styles/productcard.css'
 import '../styles/product-details.css'
 
@@ -58,7 +57,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get(`http://127.0.0.1:8000/products/products/${id}/`)
@@ -66,32 +65,37 @@ const ProductDetail = () => {
       .catch(error => console.error(error));
   }, [id]);
 
-  const handleAddToCart = async () => {
-    setLoading(true);
-    setMessage("");
-
+  const handleAddToCart = async (productId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/addtocart/${id}/`, {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        alert("You need to log in first!");
+        return;
+      }
+  
+      const response = await fetch(`http://127.0.0.1:8000/carts/add/${productId}/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCsrfToken(), // CSRF token for security
+          Authorization: `Bearer ${token}`,
         },
-        credentials: "include",
       });
-
+  
+      const data = await response.json();
+  
       if (response.ok) {
-        setMessage("Product added to cart!");
+        alert(data.message); // Show success message
+        navigate('/cart')
       } else {
-        setMessage("Product is already in the cart.");
+        alert(data.error); // Show error message if product is already in cart
+        navigate('/cart')
       }
     } catch (error) {
-      setMessage("Something went wrong!");
-    } finally {
-      setLoading(false);
+      console.error("Error adding to cart:", error);
+      alert("Something went wrong. Try again!");
     }
   };
-
+  
 
   if (!product) return <p>Loading...</p>;
 
@@ -122,8 +126,8 @@ const ProductDetail = () => {
               <h6>Price: ${product.product_price}</h6>
               <h6>Available stock: {product.stock}</h6>
             </div>
-            <Button color="primary" onClick={handleAddToCart} disabled={loading}>
-              {loading ? "Adding..." : "🛒 Add to Cart"}
+            <Button onClick={() => handleAddToCart(product.id)} disabled={loading} style={{backgroundColor:"rgb(195, 120, 70)"}}>
+              {loading ? "Adding..." : "Add to Cart"}
             </Button>
 
             {/* Message Display */}
