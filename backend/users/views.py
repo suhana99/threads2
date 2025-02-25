@@ -6,6 +6,13 @@ from django.contrib import messages
 from  .forms import OrderForm
 from django.urls import reverse
 from django.views import View
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .serializers import CartSerializer
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 def index(request):
@@ -62,6 +69,21 @@ def add_to_cart(request,product_id):
         else:
             messages.add_message(request.messages.ERROR,'Something went wrong')
 
+class AddToCartView(APIView):
+    permission_classes = [IsAuthenticated]  # ✅ Allow only authenticated users
+
+    def post(self, request, product_id):
+        user = request.user
+        product = get_object_or_404(Product, id=product_id)
+
+        # Check if the product is already in the cart
+        if Cart.objects.filter(user=user, product=product).exists():
+            return Response({"error": "Product is already in the cart."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Add product to cart
+        cart = Cart.objects.create(user=user, product=product)
+        return Response({"message": "Product added to the cart successfully!"}, status=status.HTTP_201_CREATED)
+
 @login_required
 def show_cart_items(request):
     user=request.user
@@ -72,11 +94,6 @@ def show_cart_items(request):
     }
     return render(request,'users/cart.html',context)
 
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from .serializers import CartSerializer
-from .models import Cart
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])  # Ensure only logged-in users access this
@@ -94,6 +111,20 @@ def remove_cart_item(request, cart_id):
     item.delete()
     messages.add_message(request,messages.SUCCESS,"Item removed successfully")
     return redirect('/cart')
+
+
+class RemoveCartItemView(APIView):
+    permission_classes = [IsAuthenticated]  
+
+    def delete(self, request, cart_id):
+        try:
+            cart_item = Cart.objects.get(id=cart_id, user=request.user)
+            cart_item.delete()
+            return Response({"message": "Item removed successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Cart.DoesNotExist:
+            return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        
 
 @login_required
 def order_form(request,product_id,cart_id):
