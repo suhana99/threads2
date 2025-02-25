@@ -31,34 +31,42 @@ def api_register(request):
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
-@csrf_exempt
-def api_login(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            username = data.get("username")
-            password = data.get("password")
 
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                if user.is_staff:
-                    return JsonResponse({"error": "Admins cannot log in from the frontend"}, status=403)
-                
-                login(request, user)
-                return JsonResponse({
-                    "message": "Login successful",
-                    "user": {
-                        "id": user.id,
-                        "username": user.username,
-                        "is_admin": user.is_staff
-                    }
-                }, status=200)
-            else:
-                return JsonResponse({"error": "Invalid credentials"}, status=401)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+import json
+from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
-    return JsonResponse({"error": "Only POST method allowed"}, status=405)
+@api_view(["POST"])
+@permission_classes([AllowAny])  # Allows anyone to access this view (no auth required)
+def front_login(request):
+    try:
+        data = json.loads(request.body)
+        username = data.get("username")
+        password = data.get("password")
+
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            refresh = RefreshToken.for_user(user)  # Generate JWT tokens
+            return Response({
+                "message": "Login successful",
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "is_admin": user.is_superuser
+                },
+                "access": str(refresh.access_token),
+                "refresh": str(refresh)
+            })
+        else:
+            return Response({"error": "Invalid credentials"}, status=400)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
 
 
 # Create your views here.
