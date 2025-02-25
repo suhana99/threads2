@@ -1,0 +1,33 @@
+.cart-item-card {
+    margin: 15px 0;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .cart-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .cart-item-img {
+    width: 50px; /* Tiny Image */
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+  }
+  
+  .cart-item-name {
+    flex: 1;
+  }
+  
+  .cart-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .bulk-remove-btn {
+    margin-top: 10px;
+  }
+  
