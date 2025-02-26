@@ -94,7 +94,7 @@ STRIPE_PUBLISHABLE_KEY = "pk_test_51Qffv9Klirj7tM4tuQ6CglnFb3RWhn7S25NWGSGOaY7Es
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'threads',
+        'NAME': 'threads2',
         'USER':'root',
         'PASSWORD':'',
         'HOST':'localhost',
