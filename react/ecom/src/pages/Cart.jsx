@@ -9,7 +9,7 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [selectedItems, setSelectedItems] = useState([]); // To track selected items
+  const [selectedItems, setSelectedItems] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +25,12 @@ const Cart = () => {
       })
       .then((response) => {
         if (response.data && Array.isArray(response.data.items)) {
-          setCartItems(response.data.items);
+          // Ensure default quantity is at least 1
+          const updatedItems = response.data.items.map((item) => ({
+            ...item,
+            quantity: item.quantity > 0 ? item.quantity : 1, // Ensure quantity is at least 1
+          }));
+          setCartItems(updatedItems);
         } else {
           setCartItems([]);
         }
@@ -39,23 +44,18 @@ const Cart = () => {
   }, []);
 
   const handleRemoveItem = async (cartId) => {
-    console.log("Remove clicked for cartId:", cartId); // Check if the function runs
-  
     try {
       const token = localStorage.getItem("access_token");
       if (!token) {
         console.error("No token found.");
         return;
       }
-  
+
       const response = await axios.delete(`http://127.0.0.1:8000/carts/${cartId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
-      console.log("Response status:", response.status); // Log API response
-  
+
       if (response.status === 204 || response.status === 200) {
-        console.log("Item removed successfully");
         setCartItems(cartItems.filter((item) => item.id !== cartId));
       } else {
         console.error("Unexpected response:", response);
@@ -64,23 +64,40 @@ const Cart = () => {
       console.error("Error removing item:", error.response?.data || error.message);
     }
   };
-  
 
-  // Handle checkbox selection
-  const handleCheckboxChange = (id) => {
-    setSelectedItems((prevSelected) =>
-      prevSelected.includes(id)
-        ? prevSelected.filter((itemId) => itemId !== id)
-        : [...prevSelected, id]
+  const handleQuantityChange = (id, newQuantity, stock) => {
+    if (newQuantity < 1) return; // Prevent negative or zero quantities
+    if (newQuantity > stock) return; // Prevent exceeding available stock
+
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
     );
   };
 
-  // Bulk remove items
-  const handleBulkRemove = async () => {
-    for (let id of selectedItems) {
-      await handleRemoveItem(id);
+  const updateQuantityInBackend = async (id, newQuantity) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      await axios.patch(
+        `http://127.0.0.1:8000/carts/${id}/`,
+        { quantity: newQuantity },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (error) {
+      console.error("Error updating quantity:", error);
     }
-    setSelectedItems([]); // Reset selection
+  };
+
+  const handleCheckout = () => {
+    if (selectedItems.length === 0) {
+      alert("Please select at least one item to checkout.");
+      return;
+    }
+
+    navigate("/checkout", { state: { selectedItems } });
   };
 
   if (loading) return <p className="cart-message">Loading cart...</p>;
@@ -97,56 +114,115 @@ const Cart = () => {
         </p>
       ) : (
         <>
-          {cartItems.map((item) => (
-            <Card key={item.id} className="cart-item-card">
-              <CardBody>
-                <div className="cart-item">
-                  {/* Checkbox */}
-                  <Input
-                    type="checkbox"
-                    checked={selectedItems.includes(item.id)}
-                    onChange={() => handleCheckboxChange(item.id)}
-                  />
+          {cartItems.map((item) => {
+            const stock = item.product?.stock || 1; // Ensure a valid stock value
 
-                  {/* Tiny Image */}
-                  <img
-                    src={item.product?.product_image || "default.jpg"}
-                    alt={item.product?.product_name || "Product"}
-                    className="cart-item-img"
-                  />
+            return (
+              <Card key={item.id} className="cart-item-card">
+                <CardBody>
+                  <div className="cart-item">
+                    {/* Checkbox */}
+                    <Input
+                      type="checkbox"
+                      checked={selectedItems.includes(item.id)}
+                      onChange={() => setSelectedItems((prev) =>
+                        prev.includes(item.id)
+                          ? prev.filter((itemId) => itemId !== item.id)
+                          : [...prev, item.id]
+                      )}
+                    />
 
-                  {/* Product Name (Clickable) */}
-                  <h3
-                    className="cart-item-name"
-                    onClick={() => navigate(`/product/${item.product.id}`)}
-                    style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
-                  >
-                    {item.product?.product_name || "Unnamed Product"}
-                  </h3>
+                    {/* Tiny Image */}
+                    <img
+                      src={item.product?.product_image || "default.jpg"}
+                      alt={item.product?.product_name || "Product"}
+                      className="cart-item-img"
+                    />
 
-                  {/* Price */}
-                  <p>Price: ${item.product?.product_price || "N/A"}</p>
+                    {/* Product Name */}
+                    <h3
+                      className="cart-item-name"
+                      onClick={() => navigate(`/product/${item.product.id}`)}
+                      style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+                    >
+                      {item.product?.product_name || "Unnamed Product"}
+                    </h3>
 
-                  {/* Remove & Buy Now Buttons */}
-                  <div className="cart-buttons">
-                    <Button color="danger" onClick={() => handleRemoveItem(item.id)}>
-                      Remove
-                    </Button>
-                    <Button color="success" onClick={() => navigate(`/checkout/${item.product.id}`)}>
-                      Buy Now
-                    </Button>
+                    {/* Price */}
+                    <p>Price: ${item.product?.product_price * item.quantity || "N/A"}</p>
+
+                    {/* Quantity Controls */}
+                    <div className="quantity-controls">
+                      <Button
+                        color="secondary"
+                        onClick={() => {
+                          const newQuantity = item.quantity - 1;
+                          if (newQuantity >= 1) {
+                            handleQuantityChange(item.id, newQuantity, stock);
+                            updateQuantityInBackend(item.id, newQuantity);
+                          }
+                        }}
+                      >
+                        -
+                      </Button>
+
+                      <Input
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) => {
+                          const newQuantity = parseInt(e.target.value, 10);
+                          if (!isNaN(newQuantity) && newQuantity >= 1 && newQuantity <= stock) {
+                            handleQuantityChange(item.id, newQuantity, stock);
+                            updateQuantityInBackend(item.id, newQuantity);
+                          }
+                        }}
+                        className="quantity-input"
+                      />
+
+                      <Button
+                        color="secondary"
+                        onClick={() => {
+                          const newQuantity = item.quantity + 1;
+                          if (newQuantity <= stock) {
+                            handleQuantityChange(item.id, newQuantity, stock);
+                            updateQuantityInBackend(item.id, newQuantity);
+                          }
+                        }}
+                        disabled={item.quantity >= stock}
+                      >
+                        +
+                      </Button>
+                    </div>
+
+                    {/* Stock Display */}
+                    <p>Available Stock: {stock}</p>
+
+                    {/* Remove & Buy Now Buttons */}
+                    <div className="cart-buttons">
+                      <Button color="danger" onClick={() => handleRemoveItem(item.id)}>
+                        Remove
+                      </Button>
+                      <Button color="success" onClick={() => navigate(`/checkout/${item.product.id}`)}>
+                        Buy Now
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardBody>
-            </Card>
-          ))}
+                </CardBody>
+              </Card>
+            );
+          })}
 
           {/* Bulk Remove Button */}
           {selectedItems.length > 0 && (
-            <Button color="danger" className="bulk-remove-btn" onClick={handleBulkRemove}>
+            <Button color="danger" className="bulk-remove-btn" onClick={() => selectedItems.forEach(handleRemoveItem)}>
               Remove Selected Items
             </Button>
           )}
+
+          {/* Checkout Button */}
+          <Button color="primary" className="checkout-btn" onClick={handleCheckout}>
+            Proceed to Checkout
+          </Button>
         </>
       )}
     </Container>

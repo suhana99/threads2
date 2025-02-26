@@ -124,7 +124,51 @@ class RemoveCartItemView(APIView):
         except Cart.DoesNotExist:
             return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        
+
+class UpdateCartView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, cart_id):
+        """Update the quantity of a cart item"""
+        cart_item = get_object_or_404(Cart, id=cart_id, user=request.user)
+        new_quantity = request.data.get('quantity')
+
+        if new_quantity and int(new_quantity) > 0:
+            cart_item.quantity = int(new_quantity)
+            cart_item.save()
+            return Response({"message": "Quantity updated", "quantity": cart_item.quantity}, status=status.HTTP_200_OK)
+        return Response({"error": "Invalid quantity"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['POST'])
+def checkout(request):
+    user = request.user
+    cart_items = Cart.objects.filter(user=user)
+
+    if not cart_items:
+        return Response({"error": "Your cart is empty"}, status=status.HTTP_400_BAD_REQUEST)
+
+    payment_method = request.data.get('payment_method')
+    contact_no = request.data.get('contact_no')
+    address = request.data.get('address')
+
+    total_price = sum(item.product.product_price * item.quantity for item in cart_items)
+
+    for cart_item in cart_items:
+        Order.objects.create(
+            product=cart_item.product,
+            user=user,
+            quantity=cart_item.quantity,
+            total_price=cart_item.product.product_price * cart_item.quantity,
+            payment_method=payment_method,
+            contact_no=contact_no,
+            address=address
+        )
+    
+    cart_items.delete()  # Clear cart after checkout
+    return Response({"message": "Order placed successfully", "total_price": total_price}, status=status.HTTP_201_CREATED)
+      
 
 @login_required
 def order_form(request,product_id,cart_id):

@@ -19,5 +19,8 @@ urlpatterns=[
     path('esewaform/',EsewaView.as_view(),name='esewaform'),
     path('esewaverify/<int:order_id>/<int:cart_id>',esewa_verify),
     path('myorder/',my_order),
+
+    path('cart/update/<int:cart_id>/', UpdateCartView.as_view(), name='update-cart'),
+    path('checkout/', checkout, name='checkout'),
 ]
 
