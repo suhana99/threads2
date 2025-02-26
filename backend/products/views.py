@@ -36,15 +36,6 @@ class ProductListView(generics.ListAPIView):
     search_fields = ['product_name', 'product_description','category__category_name']
 
 
-
-class ProductDetailView(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-    def get(self, request, *args, **kwargs):
-        print("Fetching product:", kwargs['pk'])
-        return super().get(request, *args, **kwargs)
-
 class CreateProductView(generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -67,53 +58,54 @@ class ProductDetailAPIView(APIView):
         product = get_object_or_404(Product, id=product_id, availability=True)
         serializer = ProductSerializer(product)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class ProductDetailView(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    def get(self, request, *args, **kwargs):
+        print("Fetching product:", kwargs['pk'])
+        return super().get(request, *args, **kwargs)
 
 
-# Review Views
 class ReviewListCreateView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
+        """Return reviews filtered by product_id."""
         product_id = self.kwargs['product_id']
         return Review.objects.filter(product_id=product_id)
 
     def perform_create(self, serializer):
+        """Ensure that the review is linked to the correct product and user."""
         product = Product.objects.get(id=self.kwargs['product_id'])
         serializer.save(product=product, user=self.request.user)
 
-
-class ProductReviewListCreateView(generics.ListCreateAPIView):
+class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]  # Allow read-only for non-authenticated users
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        product = self.kwargs['product_id']
-        return Review.objects.filter(product_id=product)
-
-    def perform_create(self, serializer):
-        product = Product.objects.get(id=self.kwargs['product_id'])
-        # Automatically assign the logged-in user to the review and the product
-        serializer.save(user=self.request.user, product_id=product)
-
-class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated]
+        """Return only the reviews for the given product_id."""
+        product_id = self.kwargs['product_id']
+        return Review.objects.filter(product_id=product_id)
 
     def get_object(self):
-        # Ensure that only the review posted by the logged-in user is editable or deletable
+        """Ensure that only the author of the review can modify or delete it."""
         obj = super().get_object()
         if obj.user != self.request.user:
             raise PermissionDenied("You are not allowed to edit or delete this review.")
         return obj
 
     def perform_update(self, serializer):
-        # Allow updating the review
+        """Allow the author to update their review."""
         serializer.save()
 
     def perform_destroy(self, instance):
-        # Allow deleting the review
+        """Allow the author to delete their review."""
         instance.delete()
+
 
 @login_required
 @admin_only
