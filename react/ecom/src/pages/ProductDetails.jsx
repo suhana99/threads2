@@ -23,18 +23,18 @@ const ProductCard = ({ product }) => {
         <CardBody>
           <h1 className="product__title">{product.product_name}</h1>
 
-          <div className="card__top d-flex align-items-center justify-content-between">
+          <div className="mt-3 card__top d-flex align-items-center justify-content-between">
             <span className="product__location d-flex align-items-center gap-1">
               Category: {product.category_name}
             </span>
           </div>
 
-          <p className="product__description mb-4" style={{ maxHeight: "100px", minHeight: "100px" }}>
+          <p className="product__description mb-5 mt-3" style={{ maxHeight: "100px", minHeight: "100px" }}>
             {product.product_description}
           </p>
 
-          <div className="card__details d-flex justify-content-between mt-2">
-            <span>Stock: {product.stock}</span>
+          <div className="card__details d-flex justify-content-between">
+            <span><h6>Stock: {product.stock}</h6></span>
           </div>
 
           <div className="card__bottom d-flex align-items-center justify-content-between mt-3">

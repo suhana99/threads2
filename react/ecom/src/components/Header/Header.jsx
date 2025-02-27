@@ -23,7 +23,6 @@ const Header = () => {
       nav__links.push({ path: '/history', display: 'History' });
       nav__links.push({ path: '/cart', display: 'Cart' });
    }
-
    useEffect(() => {
       const fetchCategories = async () => {
          try {

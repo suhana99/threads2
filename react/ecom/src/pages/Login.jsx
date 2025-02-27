@@ -37,7 +37,6 @@ const Login = () => {
         setError("Admins cannot log in from the frontend.");
         return;
       }
-      
       // Check if token is actually present in the response
       if (data.access) {
         localStorage.setItem("access_token", data.access);
@@ -52,6 +51,7 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(data.user));
       
       navigate("/");
+      window.location.reload();
       
     } catch (error) {
       setError(error.message);

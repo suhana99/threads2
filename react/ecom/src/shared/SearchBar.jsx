@@ -34,6 +34,7 @@ const SearchBar = () => {
 
       setSearchResults(result);
       navigate(`/products/search?term=${searchTerm}`, { state: result });
+      window.location.reload();
 
       // Clear input field after search
       searchRef.current.value = "";

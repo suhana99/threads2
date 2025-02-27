@@ -25,10 +25,9 @@ const Cart = () => {
       })
       .then((response) => {
         if (response.data && Array.isArray(response.data.items)) {
-          // Ensure default quantity is at least 1
           const updatedItems = response.data.items.map((item) => ({
             ...item,
-            quantity: item.quantity > 0 ? item.quantity : 1, // Ensure quantity is at least 1
+            quantity: item.quantity > 0 ? item.quantity : 1,
           }));
           setCartItems(updatedItems);
         } else {
@@ -66,8 +65,8 @@ const Cart = () => {
   };
 
   const handleQuantityChange = (id, newQuantity, stock) => {
-    if (newQuantity < 1) return; // Prevent negative or zero quantities
-    if (newQuantity > stock) return; // Prevent exceeding available stock
+    if (newQuantity < 1) return;
+    if (newQuantity > stock) return;
 
     setCartItems((prevItems) =>
       prevItems.map((item) =>
@@ -97,7 +96,17 @@ const Cart = () => {
       return;
     }
 
-    navigate("/checkout", { state: { selectedItems } });
+    const selectedCartItems = cartItems
+      .filter((item) => selectedItems.includes(item.id))
+      .map(item => ({
+        id: item.id,
+        name: item.product?.product_name || "Unnamed Product",
+        price: item.product?.product_price || 0, 
+        quantity: item.quantity
+      }));
+
+    console.log("Final Selected Items before navigating:", selectedCartItems);
+    navigate("/checkout", { state: { selectedItems: selectedCartItems } });
   };
 
   if (loading) return <p className="cart-message">Loading cart...</p>;
@@ -115,7 +124,9 @@ const Cart = () => {
       ) : (
         <>
           {cartItems.map((item) => {
-            const stock = item.product?.stock || 1; // Ensure a valid stock value
+            const stock = item.product?.stock || 1;
+            const productPrice = item.product?.product_price || 0;
+            const totalPrice = productPrice * item.quantity;
 
             return (
               <Card key={item.id} className="cart-item-card">
@@ -136,6 +147,7 @@ const Cart = () => {
                     <img
                       src={item.product?.product_image || "default.jpg"}
                       alt={item.product?.product_name || "Product"}
+                      onClick={() => navigate(`/product/${item.product.id}`)}
                       className="cart-item-img"
                     />
 
@@ -149,7 +161,7 @@ const Cart = () => {
                     </h3>
 
                     {/* Price */}
-                    <p>Price: ${item.product?.product_price * item.quantity || "N/A"}</p>
+                    <p>Price: ${totalPrice.toFixed(2)}</p>
 
                     {/* Quantity Controls */}
                     <div className="quantity-controls">
@@ -212,11 +224,14 @@ const Cart = () => {
             );
           })}
 
-          {/* Bulk Remove Button */}
+          {/* Total Price Display */}
           {selectedItems.length > 0 && (
-            <Button color="danger" className="bulk-remove-btn" onClick={() => selectedItems.forEach(handleRemoveItem)}>
-              Remove Selected Items
-            </Button>
+            <h3 className="total-price">
+              Total Price: ${cartItems
+                .filter((item) => selectedItems.includes(item.id))
+                .reduce((total, item) => total + (item.product?.product_price || 0) * item.quantity, 0)
+                .toFixed(2)}
+            </h3>
           )}
 
           {/* Checkout Button */}
