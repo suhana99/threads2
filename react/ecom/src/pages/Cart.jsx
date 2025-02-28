@@ -4,8 +4,8 @@ import { Container, Button, Card, CardBody, Input } from "reactstrap";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/cart.css";
 
-const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
+const Cart = ({ cartItems: initialCartItems }) => {
+  const [cartItems, setCartItems] = useState(initialCartItems);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -65,14 +65,11 @@ const Cart = () => {
   };
 
   const handleQuantityChange = (id, newQuantity, stock) => {
-    if (newQuantity < 1) return;
-    if (newQuantity > stock) return;
+    if (newQuantity < 1 || newQuantity > stock) return;
 
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === id
-          ? { ...item, quantity: newQuantity }
-          : item
+        item.id === id ? { ...item, quantity: newQuantity } : item
       )
     );
   };
@@ -92,17 +89,17 @@ const Cart = () => {
 
   const handleCheckout = () => {
     if (selectedItems.length === 0) {
-      alert("Please select at least one item to checkout.");
+      alert("No items selected for checkout!");
       return;
     }
 
     const selectedCartItems = cartItems
       .filter((item) => selectedItems.includes(item.id))
-      .map(item => ({
+      .map((item) => ({
         id: item.id,
         name: item.product?.product_name || "Unnamed Product",
-        price: item.product?.product_price || 0, 
-        quantity: item.quantity
+        price: item.product?.product_price || 0,
+        quantity: item.quantity,
       }));
 
     console.log("Final Selected Items before navigating:", selectedCartItems);
@@ -136,26 +133,36 @@ const Cart = () => {
                     <Input
                       type="checkbox"
                       checked={selectedItems.includes(item.id)}
-                      onChange={() => setSelectedItems((prev) =>
-                        prev.includes(item.id)
-                          ? prev.filter((itemId) => itemId !== item.id)
-                          : [...prev, item.id]
-                      )}
+                      onChange={() =>
+                        setSelectedItems((prev) =>
+                          prev.includes(item.id)
+                            ? prev.filter((itemId) => itemId !== item.id)
+                            : [...prev, item.id]
+                        )
+                      }
                     />
 
                     {/* Tiny Image */}
                     <img
                       src={item.product?.product_image || "default.jpg"}
                       alt={item.product?.product_name || "Product"}
-                      onClick={() => navigate(`/product/${item.product.id}`)}
+                      onClick={() =>
+                        navigate(`/product/${item.product?.id || "unknown"}`)
+                      }
                       className="cart-item-img"
                     />
 
                     {/* Product Name */}
                     <h3
                       className="cart-item-name"
-                      onClick={() => navigate(`/product/${item.product.id}`)}
-                      style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+                      onClick={() =>
+                        navigate(`/product/${item.product?.id || "unknown"}`)
+                      }
+                      style={{
+                        cursor: "pointer",
+                        color: "blue",
+                        textDecoration: "underline",
+                      }}
                     >
                       {item.product?.product_name || "Unnamed Product"}
                     </h3>
@@ -214,7 +221,7 @@ const Cart = () => {
                       <Button color="danger" onClick={() => handleRemoveItem(item.id)}>
                         Remove
                       </Button>
-                      <Button color="success" onClick={() => navigate(`/checkout/${item.product.id}`)}>
+                      <Button color="success" onClick={() => navigate(`/checkout/${item.product?.id || "unknown"}`)}>
                         Buy Now
                       </Button>
                     </div>
@@ -223,16 +230,6 @@ const Cart = () => {
               </Card>
             );
           })}
-
-          {/* Total Price Display */}
-          {selectedItems.length > 0 && (
-            <h3 className="total-price">
-              Total Price: ${cartItems
-                .filter((item) => selectedItems.includes(item.id))
-                .reduce((total, item) => total + (item.product?.product_price || 0) * item.quantity, 0)
-                .toFixed(2)}
-            </h3>
-          )}
 
           {/* Checkout Button */}
           <Button color="primary" className="checkout-btn" onClick={handleCheckout}>

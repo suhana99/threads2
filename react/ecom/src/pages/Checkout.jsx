@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Container, Button, Input, Form, FormGroup, Label } from "reactstrap";
+import axios from "axios";
 
 const Checkout = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const selectedItemIds = location.state?.selectedItems || [];
-
-  
+  const location = useLocation();
+  const selectedItems = location.state?.selectedItems || [];
 
   const [orderData, setOrderData] = useState({
     contact_no: "",
@@ -16,47 +14,23 @@ const Checkout = () => {
     payment_method: "Esewa",
   });
 
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Redirect if no items are passed
+  if (!selectedItems.length) {
+    navigate("/cart");
+    return null;
+  }
 
-  console.log("Received selectedItems in Checkout:", selectedItems);
-  
-  useEffect(() => {
-    if (selectedItemIds.length === 0) {
-      navigate("/cart");
-      return;
-    }
-
-    const fetchSelectedItems = async () => {
-      try {
-        const token = localStorage.getItem("access_token");
-        const response = await axios.get("http://127.0.0.1:8000/carts/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.data && Array.isArray(response.data.items)) {
-          // Filter only selected items
-          const filteredItems = response.data.items.filter(item => selectedItemIds.includes(item.id));
-          setSelectedItems(filteredItems);
-        }
-      } catch (error) {
-        console.error("Error fetching selected items:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSelectedItems();
-  }, [selectedItemIds, navigate]);
-
+  // Calculate total price
   const totalPrice = selectedItems.reduce((total, item) => {
-    return total + (item.product?.product_price || 0) * (item.quantity || 1);
+    return total + (item.price || 0) * (item.quantity || 1);
   }, 0);
-  
+
+  // Handle input change
   const handleChange = (e) => {
     setOrderData({ ...orderData, [e.target.name]: e.target.value });
   };
 
+  // Handle order submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("access_token");
@@ -65,8 +39,8 @@ const Checkout = () => {
       await axios.post(
         "http://127.0.0.1:8000/myorder/",
         {
-          user: localStorage.getItem("user_id"), // Ensure correct user ID
-          products: selectedItems.map((item) => item.product.id),
+          user: localStorage.getItem("user_id"),
+          products: selectedItems.map((item) => item.id),
           total_price: totalPrice,
           contact_no: orderData.contact_no,
           address: orderData.address,
@@ -82,8 +56,6 @@ const Checkout = () => {
       console.error("Order error:", error);
     }
   };
-
-  if (loading) return <p>Loading checkout...</p>;
 
   return (
     <Container>
