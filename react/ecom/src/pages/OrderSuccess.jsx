@@ -8,8 +8,8 @@ const OrderSuccess = () => {
 
   return (
     <div>
-      <h2>Order Placed Successfully!</h2>
-      <p>Your order ID is: {orderId}</p>
+      <h2 style={{padding:'25px 0px 5px 120px'}}>Order Placed Successfully!</h2>
+      {/* <p>Your order ID is: {orderId}</p> */}
     </div>
   );
 };

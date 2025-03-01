@@ -88,7 +88,7 @@
  
  .booking__btn:hover {
     transform: scale(1.1);
-    color    : purple;
+    color    : rgb(235, 231, 235);
  }
  
  /* =============== RESPONSIVE ================ */

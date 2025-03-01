@@ -45,7 +45,7 @@ const Checkout = () => {
 
     try {
         const response = await axios.post(
-            "http://127.0.0.1:8000/create-order/",
+            "http://127.0.0.1:8000/checkout/",
             {
                 products: selectedItems.map((item) => item.id),
                 quantities: selectedItems.map((item) => item.quantity),
@@ -115,7 +115,7 @@ const Checkout = () => {
             <option value="Stripe">Stripe</option>
           </Input>
         </FormGroup>
-        <Button style={{backgroundColor:"rgb(195, 120, 70)", color:"white"}} type="submit">
+        <Button style={{backgroundColor:"rgb(20, 30, 40)", color:"white",marginTop:'8px'}} type="submit">
           Place Order
         </Button>
       </Form>

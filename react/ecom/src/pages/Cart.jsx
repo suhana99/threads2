@@ -111,7 +111,7 @@ const Cart = ({ cartItems: initialCartItems }) => {
 
   return (
     <Container>
-      <h1 className="cart-title">🛒 Your Cart</h1>
+      <h1 className="cart-title mt-4 mb-4">🛒 Your Cart</h1>
       {error && <p className="cart-error">{error}</p>}
       {message && <p className="cart-message">{message}</p>}
 
@@ -127,7 +127,7 @@ const Cart = ({ cartItems: initialCartItems }) => {
             const totalPrice = productPrice * item.quantity;
 
             return (
-              <Card key={item.id} className="cart-item-card">
+              <Card key={item.id} className="cart-item-card mt-4">
                 <CardBody>
                   <div className="cart-item">
                     {/* Checkbox */}
@@ -229,7 +229,7 @@ const Cart = ({ cartItems: initialCartItems }) => {
           })}
 
           {/* Checkout Button */}
-          <Button style={{backgroundColor:"rgb(195, 120, 70)", color:"white"}} className="checkout-btn mt-4" onClick={handleCheckout}>
+          <Button style={{backgroundColor:"rgb(20, 30, 40)", color:"white"}} className="checkout-btn mt-4" onClick={handleCheckout}>
             Proceed to Checkout
           </Button>
         </>
