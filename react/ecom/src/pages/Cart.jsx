@@ -3,6 +3,7 @@ import axios from "axios";
 import { Container, Button, Card, CardBody, Input } from "reactstrap";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/cart.css";
+import { FaTrash } from "react-icons/fa";
 
 const Cart = ({ cartItems: initialCartItems }) => {
   const [cartItems, setCartItems] = useState(initialCartItems);
@@ -142,7 +143,6 @@ const Cart = ({ cartItems: initialCartItems }) => {
                       }
                     />
 
-                    {/* Tiny Image */}
                     <img
                       src={item.product?.product_image || "default.jpg"}
                       alt={item.product?.product_name || "Product"}
@@ -153,27 +153,27 @@ const Cart = ({ cartItems: initialCartItems }) => {
                     />
 
                     {/* Product Name */}
-                    <h3
+                    <h4
                       className="cart-item-name"
                       onClick={() =>
                         navigate(`/product/${item.product?.id || "unknown"}`)
                       }
                       style={{
                         cursor: "pointer",
-                        color: "blue",
-                        textDecoration: "underline",
+                        // color: "blue",
+                        // textDecoration: "underline",
                       }}
                     >
                       {item.product?.product_name || "Unnamed Product"}
-                    </h3>
+                    </h4>
 
                     {/* Price */}
-                    <p>Price: ${totalPrice.toFixed(2)}</p>
+                    <h5 style={{marginLeft:'1%', marginRight:'5%'}}>Price: ${totalPrice.toFixed(2)}</h5>
 
                     {/* Quantity Controls */}
                     <div className="quantity-controls">
                       <Button
-                        color="secondary"
+                        classname="btn-dark"
                         onClick={() => {
                           const newQuantity = item.quantity - 1;
                           if (newQuantity >= 1) {
@@ -199,7 +199,7 @@ const Cart = ({ cartItems: initialCartItems }) => {
                       />
 
                       <Button
-                        color="secondary"
+                        classname="btn-dark"
                         onClick={() => {
                           const newQuantity = item.quantity + 1;
                           if (newQuantity <= stock) {
@@ -214,12 +214,12 @@ const Cart = ({ cartItems: initialCartItems }) => {
                     </div>
 
                     {/* Stock Display */}
-                    <p>Available Stock: {stock}</p>
+                    <h5 style={{marginLeft:'1%', marginRight:'5%'}}>stock: {stock}</h5>
 
                     {/* Remove & Buy Now Buttons */}
                     <div className="cart-buttons">
-                      <Button color="danger" onClick={() => handleRemoveItem(item.id)}>
-                        Remove
+                      <Button className="btn-dark" onClick={() => handleRemoveItem(item.id)}>
+                      <FaTrash /> 
                       </Button>
                     </div>
                   </div>
@@ -229,7 +229,7 @@ const Cart = ({ cartItems: initialCartItems }) => {
           })}
 
           {/* Checkout Button */}
-          <Button color="primary" className="checkout-btn" onClick={handleCheckout}>
+          <Button style={{backgroundColor:"rgb(195, 120, 70)", color:"white"}} className="checkout-btn mt-4" onClick={handleCheckout}>
             Proceed to Checkout
           </Button>
         </>

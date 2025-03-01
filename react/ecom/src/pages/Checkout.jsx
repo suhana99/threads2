@@ -80,8 +80,8 @@ const Checkout = () => {
 
   return (
     <Container>
-      <h2>Checkout</h2>
-      <p>Total Price: ${totalPrice}</p>
+      <h2 className="mt-5 mb-3">Checkout</h2>
+      <p><b>Total Price: ${totalPrice}</b></p>
       <Form onSubmit={handleSubmit}>
         <FormGroup>
           <Label for="contact_no">Contact No</Label>
@@ -115,7 +115,7 @@ const Checkout = () => {
             <option value="Stripe">Stripe</option>
           </Input>
         </FormGroup>
-        <Button color="primary" type="submit">
+        <Button style={{backgroundColor:"rgb(195, 120, 70)", color:"white"}} type="submit">
           Place Order
         </Button>
       </Form>

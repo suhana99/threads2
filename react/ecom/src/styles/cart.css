@@ -1,8 +1,8 @@
 .cart-item-card {
     margin: 15px 0;
     padding: 10px;
-    display: flex;
-    align-items: center;
+    padding-left: 10%;
+    padding-right: 10%;
   }
   
   .cart-item {
@@ -12,9 +12,9 @@
   }
   
   .cart-item-img {
-    width: 50px; /* Tiny Image */
-    height: 50px;
-    object-fit: cover;
+    width: 70px; /* Tiny Image */
+    height: 80px;
+    object-fit: fit;
     border-radius: 5px;
   }
   
