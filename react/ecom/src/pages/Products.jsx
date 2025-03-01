@@ -64,7 +64,7 @@ const Products = () => {
                 </Col>
               ))}
 
-              <Col lg="12">
+              {/* <Col lg="12">
                 <div className="pagination d-flex align-items-center justify-content-center mt-4 gap-3">
                   {[...Array(pageCount).keys()].map((number) => (
                     <span
@@ -76,7 +76,7 @@ const Products = () => {
                     </span>
                   ))}
                 </div>
-              </Col>
+              </Col> */}
             </Row>
           ) : (
             !loading && !error && <h4 className="text-center pt-5">No Products Found</h4>
