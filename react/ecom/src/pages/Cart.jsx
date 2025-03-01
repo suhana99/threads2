@@ -221,9 +221,6 @@ const Cart = ({ cartItems: initialCartItems }) => {
                       <Button color="danger" onClick={() => handleRemoveItem(item.id)}>
                         Remove
                       </Button>
-                      <Button color="success" onClick={() => navigate(`/checkout/${item.product?.id || "unknown"}`)}>
-                        Buy Now
-                      </Button>
                     </div>
                   </div>
                 </CardBody>

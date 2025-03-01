@@ -9,6 +9,8 @@ import SearchResultList from '../shared/SearchResultList'
 import CategoryPage from '../pages/CategoryPage'
 import Cart from '../pages/Cart'
 import Checkout from '../pages/Checkout'
+import OrderSuccess from '../pages/OrderSuccess'
+import OrderFailed from '../pages/OrderFailed'
 
 const Routers = () =>{
     return(
@@ -22,6 +24,8 @@ const Routers = () =>{
             <Route path="/category/:id" element={<CategoryPage />} />
             <Route path="/cart" element={<Cart/>} />
             <Route path="/checkout" element={<Checkout/>}/>
+            <Route path="/order-success" element={<OrderSuccess/>}/>
+            <Route path='/order-failed' element={<OrderFailed/>}/>
         </Routes>
     )
 }

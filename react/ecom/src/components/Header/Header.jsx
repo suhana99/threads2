@@ -20,7 +20,6 @@ const Header = () => {
 
    
    if (user) {
-      nav__links.push({ path: '/history', display: 'History' });
       nav__links.push({ path: '/cart', display: 'Cart' });
    }
    useEffect(() => {
