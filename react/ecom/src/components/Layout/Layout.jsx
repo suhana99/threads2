@@ -1,9 +1,9 @@
 import React from 'react'
 import Header from './../Header/Header'
-// import Footer from './../Footer/Footer'
 import '../../styles/NoLayout.css'
 import { useLocation } from 'react-router-dom'
 import Routers from '../../router/Routers'
+import Footer from './Footer/Footer'
 
 const Layout = () => {
    const location = useLocation()
@@ -19,7 +19,7 @@ const Layout = () => {
       <>
          {!isNoLayoutRoute && <Header />}
          <Routers/>
-         {/* {!isNoLayoutRoute && <Footer />}    */}
+         {!isNoLayoutRoute && <Footer />}   
       </>
    )
 }
