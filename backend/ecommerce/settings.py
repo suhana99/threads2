@@ -130,6 +130,8 @@ REST_FRAMEWORK = {
     ],
 }
 
+STRIPE_SECRET_KEY = "sk_test_51Qffv9Klirj7tM4trvHktpqf9AaossEoQ6wx4NrIsM0rcM5EqegqmbMTTXjXhmfrHkxO5iCc79ev3iBjW9a6ep8x00yyIE4jFf"
+STRIPE_PUBLISHABLE_KEY = "pk_test_51Qffv9Klirj7tM4tuQ6CglnFb3RWhn7S25NWGSGOaY7Es8nOk7qyorFaVKzcpH3nxEOk3I9YFPiSBT1pQ7PDVeWi00DAFuAkbZ"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -194,3 +196,5 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 FRONTEND_URL="http://localhost:3000"
+
+DEBUG = True  # Make sure this is set for development

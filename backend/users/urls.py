@@ -22,5 +22,8 @@ urlpatterns=[
 
     path('cart/update/<int:cart_id>/', UpdateCartView.as_view(), name='update-cart'),
     path('checkout/', checkout, name='checkout'),
+
+    path("create-order/", OrderAPIView.as_view(), name="create_order"),
+    path("stripe-webhook/", stripe_webhook, name="stripe_webhook"),
 ]
 

@@ -14,6 +14,11 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import CartSerializer
 from django.shortcuts import get_object_or_404
 
+from django.conf import settings
+import stripe
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
 # Create your views here.
 def index(request):
     products=Product.objects.all().order_by('-id')[:8]  #last ma enter gareko last ma dekhincha
@@ -287,4 +292,158 @@ def my_order(request):
         'items':items
     }
     return render(request,'users/myorder.html',context)
-    
+
+
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import stripe
+import logging
+from .models import Order, Product  # Ensure your models are imported
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+logger = logging.getLogger(__name__)  # Enable logging
+
+from django.http import JsonResponse
+
+
+
+# import json
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from django.contrib.auth.decorators import login_required
+# from .models import Order, Product
+
+# @csrf_exempt  # Remove this if using Django Rest Framework authentication
+# def create_order(request):
+#     try:
+#         print("Authorization Header:", request.headers.get("Authorization"))
+#         print("User:", request.user)  
+#         print("Is Authenticated:", request.user.is_authenticated)
+
+#         if not request.user.is_authenticated:
+#             return JsonResponse({"error": "Unauthorized"}, status=401)
+        
+#         data = json.loads(request.body)
+#         products = data.get("products")
+#         quantities = data.get("quantities")
+#         total_price = data.get("total_price")
+#         payment_method = data.get("payment_method")
+#         contact_no = data.get("contact_no")
+#         address = data.get("address")
+
+#         if not products or not quantities or not total_price or not payment_method:
+#             return JsonResponse({"error": "Missing required fields"}, status=400)
+
+#         # ✅ Create order
+#         order = Order.objects.create(
+#             user=request.user,
+#             total_price=total_price,
+#             payment_method=payment_method,
+#             contact_no=contact_no,
+#             address=address
+#         )
+
+#         # Add products to order
+#         for product_id, quantity in zip(products, quantities):
+#             product = Product.objects.get(id=product_id)
+#             order.product.add(product)  # If ManyToManyField; otherwise, use a different approach
+
+#         return JsonResponse({"message": "Order created successfully", "order_id": order.id}, status=201)
+
+#     except json.JSONDecodeError:
+#         return JsonResponse({"error": "Invalid JSON format"}, status=400)
+
+#     except Product.DoesNotExist:
+#         return JsonResponse({"error": "One or more products not found"}, status=400)
+
+#     except Exception as e:
+#         return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)
+
+class OrderAPIView(APIView):
+    permission_classes = [IsAuthenticated]  
+
+    def post(self, request):
+        """Create multiple orders from selected cart items"""
+        user = request.user
+        data = request.data
+
+        cart_items = data.get("cart_items", [])  # Expecting an array of cart items
+        payment_method = data.get("payment_method")
+        contact_no = data.get("contact_no")
+        address = data.get("address")
+
+        if not cart_items:
+            return Response({"error": "No items selected for checkout"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order_list = []  # Store created orders
+        total_order_price = 0  # Track total price
+
+        for item in cart_items:
+            product = get_object_or_404(Product, id=item["id"])
+            cart_item = get_object_or_404(Cart, id=item.get("cart_id"), user=user)
+
+            # Calculate total price per item (quantity * price)
+            total_price = item["quantity"] * product.product_price
+            total_order_price += total_price
+
+            # Create an order
+            order = Order.objects.create(
+                product=product,
+                user=user,
+                quantity=item["quantity"],
+                total_price=total_price,
+                contact_no=contact_no,
+                address=address,
+                payment_method=payment_method,
+                payment_status="Pending"  # Default status
+            )
+
+            order_list.append({
+                "order_id": order.id,
+                "product_name": product.name,
+                "total_price": total_price
+            })
+
+            # Remove cart item after placing order
+            cart_item.delete()
+
+        # Handle payment response
+        if payment_method == "Cash on Delivery":
+            return Response({"message": "Order placed successfully!", "orders": order_list}, status=status.HTTP_201_CREATED)
+
+        # elif payment_method == "Esewa":
+        #     redirect_url = reverse('esewaform') + f"?o_id={order_list[0]['order_id']}"  # Redirect to Esewa form
+        #     return Response({"redirect_url": redirect_url}, status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid payment method"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.headers.get("Stripe-Signature")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    except stripe.error.SignatureVerificationError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+    # Handle the checkout.session.completed event
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        order_id = session["metadata"].get("order_id")
+        if order_id:
+            order = Order.objects.get(id=order_id)
+            order.payment_status = True
+            order.save()
+
+    return JsonResponse({"status": "success"})
