@@ -125,10 +125,10 @@ const Header = () => {
                            </>
                         ) : (
                            <>
-                              <Button className="btn secondary__btn" onClick={() => navigate('/login')}>
+                              <Button className="btn btn-dark" onClick={() => navigate('/login')}>
                                  Login
                               </Button>
-                              <Button className="btn primary__btn" onClick={() => navigate('/register')}>
+                              <Button className="btn btn-dark" onClick={() => navigate('/register')}>
                                  Register
                               </Button>
                            </>

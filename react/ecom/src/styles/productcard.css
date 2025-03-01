@@ -68,15 +68,16 @@
     font-weight: 700;
  }
  
- .card__bottom h5 span {
+ .card__bottom h5{
     font-weight: 500;
-    color      : var(--text-color);
-    font-size  : 1rem;
+    color      : rgb(88, 149, 53);
+    font-size  : 1.2rem;
  }
  
  
  .booking__btn {
-    background-color: var(--secondary-color) !important;
+    background-color: rgb(0,0,0);
+    color: white;
     padding         : 0.6rem;
     transition      : 0.5s;
     cursor          : pointer;
