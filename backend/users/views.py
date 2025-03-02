@@ -148,32 +148,62 @@ class UpdateCartView(APIView):
 
 @api_view(['POST'])
 def checkout(request):
-    user = request.user
-    cart_items = Cart.objects.filter(user=user)
+    try:
+        user = request.user
+        product_ids = list(map(int, request.data.get('products', [])))  
+        quantities = list(map(int, request.data.get('quantities', [])))  
 
-    if not cart_items:
-        return Response({"error": "Your cart is empty"}, status=status.HTTP_400_BAD_REQUEST)
+        print("Received Product IDs:", product_ids)  
+        print("Received Quantities:", quantities)  
 
-    payment_method = request.data.get('payment_method')
-    contact_no = request.data.get('contact_no')
-    address = request.data.get('address')
+        cart_items = Cart.objects.filter(user=user, product_id__in=product_ids)
+        
+        if not cart_items.exists():
+            return Response({"error": "Selected items not found in cart"}, status=400)
 
-    total_price = sum(item.product.product_price * item.quantity for item in cart_items)
+        orders = []
+        total_price = 0
 
-    for cart_item in cart_items:
-        Order.objects.create(
-            product=cart_item.product,
-            user=user,
-            quantity=cart_item.quantity,
-            total_price=cart_item.product.product_price * cart_item.quantity,
-            payment_method=payment_method,
-            contact_no=contact_no,
-            address=address
-        )
+        for cart_item in cart_items:
+            product_id = cart_item.product.id
+            if product_id not in product_ids:
+                continue  
+
+            quantity_index = product_ids.index(product_id)
+            ordered_quantity = quantities[quantity_index]
+
+            print(f"Processing Cart Item: {cart_item}, Product ID: {product_id}, Ordered Qty: {ordered_quantity}")
+
+            if ordered_quantity > cart_item.quantity:
+                return Response({"error": f"Invalid quantity for {cart_item.product.product_name}"}, status=400)
+
+            order = Order.objects.create(
+                product=cart_item.product,
+                user=user,
+                quantity=ordered_quantity,
+                total_price=cart_item.product.product_price * ordered_quantity,
+                payment_method=request.data.get("payment_method"),
+                contact_no=request.data.get("contact_no"),
+                address=request.data.get("address")
+            )
+            orders.append(order)
+            total_price += cart_item.product.product_price * ordered_quantity
+
+            # 🔹 Update or delete cart items after ordering
+            if ordered_quantity == cart_item.quantity:
+                cart_item.delete()
+            else:
+                cart_item.quantity -= ordered_quantity
+                cart_item.save()
+
+        return Response({"message": "Order placed successfully", "total_price": total_price}, status=201)
     
-    cart_items.delete()  # Clear cart after checkout
-    return Response({"message": "Order placed successfully", "total_price": total_price}, status=status.HTTP_201_CREATED)
-      
+    except Exception as e:
+        print("Error:", str(e))
+        return Response({"error": str(e)}, status=400)
+
+
+
 
 @login_required
 def order_form(request,product_id,cart_id):

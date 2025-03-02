@@ -95,13 +95,14 @@ const Cart = ({ cartItems: initialCartItems }) => {
     }
 
     const selectedCartItems = cartItems
-      .filter((item) => selectedItems.includes(item.id))
-      .map((item) => ({
-        id: item.id,
-        name: item.product?.product_name || "Unnamed Product",
-        price: item.product?.product_price || 0,
-        quantity: item.quantity,
-      }));
+  .filter((item) => selectedItems.includes(item.id))
+  .map((item) => ({
+    id: item.product?.id, // Ensure this is the product ID
+    name: item.product?.product_name || "Unnamed Product",
+    price: item.product?.product_price || 0,
+    quantity: item.quantity,
+  }));
+
 
     console.log("Final Selected Items before navigating:", selectedCartItems);
     navigate("/checkout", { state: { selectedItems: selectedCartItems } });
