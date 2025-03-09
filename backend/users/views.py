@@ -19,61 +19,6 @@ import stripe
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-# Create your views here.
-def index(request):
-    products=Product.objects.all().order_by('-id')[:8]  #last ma enter gareko last ma dekhincha
-    context={
-        'products':products
-    }
-    return render(request,'users/index.html',context)
-
-def products(request):
-    products=Product.objects.all()
-    context={
-        'products':products
-    }
-    return render(request,'users/products.html',context)
-
-def productdetail(request,product_id):
-    product=Product.objects.get(id=product_id)
-    context={
-        'product':product
-    }
-    return render(request,'users/productdetails.html',context)
-
-def mens(request):
-    # Retrieve men's clothing products
-
-         return render(request,'users/men.html')
-
-def accessories(request):
-         return render(request,'users/accessories.html')
-
-def women(request):
-         return render(request,'users/women.html')
-
-def kids(request):
-         return render(request,'users/kids.html')
-
-def shoes(request):
-         return render(request,'users/shoes.html')
-
-@login_required
-def add_to_cart(request,product_id):
-    user = request.user
-    product = Product.objects.get(id=product_id)
-    check_items_presence=Cart.objects.filter(user=user,product=product)
-    if(check_items_presence):
-        messages.add_message(request,messages.ERROR,'Prodcut is already in the Cart.')
-        return redirect('/productlist')
-    else:
-        cart=Cart.objects.create(product=product,user=user)
-        if cart:
-            messages.add_message(request,messages.SUCCESS,'Product added to the cart successfully.')
-            return redirect('/cart')
-        else:
-            messages.add_message(request.messages.ERROR,'Something went wrong')
-
 class AddToCartView(APIView):
     permission_classes = [IsAuthenticated]  # ✅ Allow only authenticated users
 
@@ -89,16 +34,6 @@ class AddToCartView(APIView):
         cart = Cart.objects.create(user=user, product=product)
         return Response({"message": "Product added to the cart successfully!"}, status=status.HTTP_201_CREATED)
 
-@login_required
-def show_cart_items(request):
-    user=request.user
-    items=Cart.objects.filter(user=user)
-
-    context={
-        'items':items
-    }
-    return render(request,'users/cart.html',context)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])  # Ensure only logged-in users access this
@@ -108,14 +43,6 @@ def show_cart_items_front(request):
     
     serializer = CartSerializer(items, many=True)  # Serialize cart items
     return Response({"items": serializer.data})  # Return JSON response
-
-
-@login_required
-def remove_cart_item(request, cart_id):
-    item=Cart.objects.get(id=cart_id)
-    item.delete()
-    messages.add_message(request,messages.SUCCESS,"Item removed successfully")
-    return redirect('/cart')
 
 
 class RemoveCartItemView(APIView):
