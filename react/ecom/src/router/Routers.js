@@ -11,6 +11,7 @@ import Cart from '../pages/Cart'
 import Checkout from '../pages/Checkout'
 import OrderSuccess from '../pages/OrderSuccess'
 import OrderFailed from '../pages/OrderFailed'
+import OrderHistory from '../pages/OrderHistory'
 
 const Routers = () =>{
     return(
@@ -26,6 +27,7 @@ const Routers = () =>{
             <Route path="/checkout" element={<Checkout/>}/>
             <Route path="/order-success" element={<OrderSuccess/>}/>
             <Route path='/order-failed' element={<OrderFailed/>}/>
+            <Route path="/my-orders" element={<OrderHistory />} />
         </Routes>
     )
 }

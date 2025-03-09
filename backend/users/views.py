@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CartSerializer
+from .serializers import CartSerializer, OrderSerializer
 from django.shortcuts import get_object_or_404
 
 from django.conf import settings
@@ -219,6 +219,14 @@ def my_order(request):
         'items':items
     }
     return render(request,'users/myorder.html',context)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_order_api(request):
+    user = request.user
+    orders = Order.objects.filter(user=user)
+    serializer = OrderSerializer(orders, many=True)
+    return Response(serializer.data)
 
 
 

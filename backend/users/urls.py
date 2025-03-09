@@ -8,6 +8,7 @@ urlpatterns=[
     path('esewaform/',EsewaView.as_view(),name='esewaform'),
     path('esewaverify/<int:order_id>/<int:cart_id>',esewa_verify),
     path('myorder/',my_order),
+     path('my-orders/', my_order_api, name='my-orders-api'),
     path('cart/update/<int:cart_id>/', UpdateCartView.as_view(), name='update-cart'),
     path('checkout/', checkout, name='checkout'),
     path("stripe-webhook/", stripe_webhook, name="stripe_webhook"),
