@@ -74,6 +74,7 @@ const ProductDetail = () => {
   const handleAddToCart = async (productId) => {
     if (!token) {
       alert("You need to log in first!");
+      navigate("/login");
       return;
     }
 
@@ -89,10 +90,10 @@ const ProductDetail = () => {
       const data = await response.json();
       if (response.ok) {
         alert(data.message);
-        navigate('/cart');
+        // navigate('/cart');
       } else {
         alert(data.error);
-        navigate('/cart');
+        // navigate('/cart');
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -153,8 +154,7 @@ const ProductDetail = () => {
             {reviews.length > 0 ? (
               reviews.map((review) => (
                 <div key={review.id} className="review">
-                  <strong>{review.user.username}</strong>
-                  <p>Rating: {review.rating} ⭐</p>
+                  <h6>{review.username} : {review.rating} ⭐</h6>
                   <p>{review.comment}</p>
                   <hr />
                 </div>

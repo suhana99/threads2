@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import '../styles/login.css';
 import {Form, FormGroup, Button } from 'reactstrap';
 import userIcon from '../assets/images/user.png';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -56,6 +57,14 @@ const Login = () => {
     } catch (error) {
       setError(error.message);
     }
+
+    const notifySuccess = () => {
+      toast.success('Success message!');
+    };
+    
+    const notifyError = () => {
+      toast.error('Error message!');
+    };
   };
   
 

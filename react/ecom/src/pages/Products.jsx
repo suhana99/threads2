@@ -7,7 +7,7 @@ import axios from "axios";
 import { ProductCard } from "./ProductDetails";
 
 const Products = () => {
-  const [products, setProducts] = useState([]); // ✅ Ensure products is always an array
+  const [products, setProducts] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
@@ -21,9 +21,9 @@ const Products = () => {
       try {
         const response = await axios.get(`${BASE_URL}/products/products/?page=${page}`);
         
-        console.log("API Full Response:", response.data); // ✅ Check structure
+        console.log("API Full Response:", response.data); 
   
-        setProducts(response.data); // ✅ Use response.data directly (since it's an array)
+        setProducts(response.data); 
         setPageCount(response.data.total_pages || 1); 
   
         console.log("Fetched Products after update:", response.data);
@@ -39,13 +39,12 @@ const Products = () => {
   }, [page]);
   
   
-  // ✅ Confirm state update
   useEffect(() => {
     console.log("Updated State - Products:", products);
   }, [products]);
   
 
-  console.log("Fetched products:", products); // ✅ Debugging
+  console.log("Fetched products:", products); 
 
   return (
     <>
