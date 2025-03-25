@@ -6,7 +6,7 @@ import "../styles/cart.css";
 import { FaTrash } from "react-icons/fa";
 
 const Cart = ({ cartItems: initialCartItems }) => {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const [cartItems, setCartItems] = useState(initialCartItems || []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -26,11 +26,10 @@ const Cart = ({ cartItems: initialCartItems }) => {
       })
       .then((response) => {
         if (response.data && Array.isArray(response.data.items)) {
-          const updatedItems = response.data.items.map((item) => ({
+          setCartItems(response.data.items.map((item) => ({
             ...item,
             quantity: item.quantity > 0 ? item.quantity : 1,
-          }));
-          setCartItems(updatedItems);
+          })));
         } else {
           setCartItems([]);
         }
@@ -38,41 +37,40 @@ const Cart = ({ cartItems: initialCartItems }) => {
       })
       .catch((error) => {
         console.error("Error fetching cart items:", error);
+        setError("Failed to load cart items. Please try again.");
         setCartItems([]);
         setLoading(false);
       });
-  }, []);
+  }, [initialCartItems]);
 
   const handleRemoveItem = async (cartId) => {
     try {
       const token = localStorage.getItem("access_token");
-      if (!token) {
-        console.error("No token found.");
-        return;
-      }
+      if (!token) return;
 
       const response = await axios.delete(`http://127.0.0.1:8000/carts/${cartId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.status === 204 || response.status === 200) {
-        setCartItems(cartItems.filter((item) => item.id !== cartId));
-      } else {
-        console.error("Unexpected response:", response);
+        setCartItems(cartItems.filter((item) => item.product_id !== cartId)); ////////////////////////////////////////////////////////////////////
       }
     } catch (error) {
       console.error("Error removing item:", error.response?.data || error.message);
+      setError("Failed to remove item.");
     }
   };
 
-  const handleQuantityChange = (id, newQuantity, stock) => {
+  const handleQuantityChange = (product_id, newQuantity, stock) => {
     if (newQuantity < 1 || newQuantity > stock) return;
 
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
+        item.product_id === product_id ? { ...item, quantity: newQuantity } : item
       )
     );
+
+    updateQuantityInBackend(product_id, newQuantity);
   };
 
   const updateQuantityInBackend = async (id, newQuantity) => {
@@ -85,6 +83,7 @@ const Cart = ({ cartItems: initialCartItems }) => {
       );
     } catch (error) {
       console.error("Error updating quantity:", error);
+      setError("Failed to update quantity.");
     }
   };
 
@@ -95,9 +94,9 @@ const Cart = ({ cartItems: initialCartItems }) => {
     }
 
     const selectedCartItems = cartItems
-      .filter((item) => selectedItems.includes(item.id))
+      .filter((item) => selectedItems.includes(item.product_id))
       .map((item) => ({
-        id: item.id,
+        product_id: item.product_id,
         name: item.product?.product_name || "Unnamed Product",
         price: item.product?.product_price || 0,
         quantity: item.quantity,
@@ -106,6 +105,11 @@ const Cart = ({ cartItems: initialCartItems }) => {
     console.log("Final Selected Items before navigating:", selectedCartItems);
     navigate("/checkout", { state: { selectedItems: selectedCartItems } });
   };
+
+  {cartItems.map((item) => (
+    console.log("item.product_id",item.product_id),
+    console.log("item.product.pro_id",item.product_id)
+  ))}
 
   if (loading) return <p className="cart-message">Loading cart...</p>;
 
@@ -127,18 +131,18 @@ const Cart = ({ cartItems: initialCartItems }) => {
             const totalPrice = productPrice * item.quantity;
 
             return (
-              <Card key={item.id} className="cart-item-card mt-4">
+              <Card key={item.product_id} className="cart-item-card mt-4">
                 <CardBody>
                   <div className="cart-item">
                     {/* Checkbox */}
                     <Input
                       type="checkbox"
-                      checked={selectedItems.includes(item.id)}
+                      checked={selectedItems.includes(item.product_id)}
                       onChange={() =>
                         setSelectedItems((prev) =>
-                          prev.includes(item.id)
-                            ? prev.filter((itemId) => itemId !== item.id)
-                            : [...prev, item.id]
+                          prev.includes(item.product_id)
+                            ? prev.filter((itemId) => itemId !== item.product_id)
+                            : [...prev, item.product_id]
                         )
                       }
                     />
@@ -146,41 +150,30 @@ const Cart = ({ cartItems: initialCartItems }) => {
                     <img
                       src={item.product?.product_image || "default.jpg"}
                       alt={item.product?.product_name || "Product"}
-                      onClick={() =>
-                        navigate(`/product/${item.product?.id || "unknown"}`)
-                      }
+                      onClick={() => navigate(`/product/${item.product?.id || "unknown"}`)}
                       className="cart-item-img"
                     />
 
                     {/* Product Name */}
                     <h4
                       className="cart-item-name"
-                      onClick={() =>
-                        navigate(`/product/${item.product?.id || "unknown"}`)
-                      }
-                      style={{
-                        cursor: "pointer",
-                        // color: "blue",
-                        // textDecoration: "underline",
-                      }}
+                      onClick={() => navigate(`/product/${item.product?.id || "unknown"}`)}
+                      style={{ cursor: "pointer" }}
                     >
                       {item.product?.product_name || "Unnamed Product"}
                     </h4>
 
                     {/* Price */}
-                    <h5 style={{marginLeft:'1%', marginRight:'5%'}}>Price: ${totalPrice.toFixed(2)}</h5>
+                    <h5 style={{ marginLeft: "1%", marginRight: "5%" }}>
+                      Price: ${totalPrice.toFixed(2)}
+                    </h5>
 
                     {/* Quantity Controls */}
                     <div className="quantity-controls">
                       <Button
-                        classname="btn-dark"
-                        onClick={() => {
-                          const newQuantity = item.quantity - 1;
-                          if (newQuantity >= 1) {
-                            handleQuantityChange(item.id, newQuantity, stock);
-                            updateQuantityInBackend(item.id, newQuantity);
-                          }
-                        }}
+                        className="btn-dark"
+                        onClick={() => handleQuantityChange(item.product_id, item.quantity - 1, stock)}
+                        disabled={item.quantity <= 1}
                       >
                         -
                       </Button>
@@ -191,37 +184,25 @@ const Cart = ({ cartItems: initialCartItems }) => {
                         onChange={(e) => {
                           const newQuantity = parseInt(e.target.value, 10);
                           if (!isNaN(newQuantity) && newQuantity >= 1 && newQuantity <= stock) {
-                            handleQuantityChange(item.id, newQuantity, stock);
-                            updateQuantityInBackend(item.id, newQuantity);
+                            handleQuantityChange(item.product_id, newQuantity, stock);
                           }
                         }}
                         className="quantity-input"
                       />
 
                       <Button
-                        classname="btn-dark"
-                        onClick={() => {
-                          const newQuantity = item.quantity + 1;
-                          if (newQuantity <= stock) {
-                            handleQuantityChange(item.id, newQuantity, stock);
-                            updateQuantityInBackend(item.id, newQuantity);
-                          }
-                        }}
+                        className="btn-dark"
+                        onClick={() => handleQuantityChange(item.product_id, item.quantity + 1, stock)}
                         disabled={item.quantity >= stock}
                       >
                         +
                       </Button>
                     </div>
 
-                    {/* Stock Display */}
-                    <h5 style={{marginLeft:'1%', marginRight:'5%'}}>stock: {stock}</h5>
-
-                    {/* Remove & Buy Now Buttons */}
-                    <div className="cart-buttons">
-                      <Button className="btn-dark" onClick={() => handleRemoveItem(item.id)}>
-                      <FaTrash /> 
-                      </Button>
-                    </div>
+                    {/* Remove Button */}
+                    <Button className="btn-dark" onClick={() => handleRemoveItem(item.product_id)}>
+                      <FaTrash />
+                    </Button>
                   </div>
                 </CardBody>
               </Card>
@@ -229,7 +210,7 @@ const Cart = ({ cartItems: initialCartItems }) => {
           })}
 
           {/* Checkout Button */}
-          <Button style={{backgroundColor:"rgb(20, 30, 40)", color:"white"}} className="checkout-btn mt-4" onClick={handleCheckout}>
+          <Button className="checkout-btn mt-4" onClick={handleCheckout}>
             Proceed to Checkout
           </Button>
         </>

@@ -47,7 +47,7 @@ const Checkout = () => {
         const response = await axios.post(
             "http://127.0.0.1:8000/checkout/",
             {
-                products: selectedItems.map((item) => item.id),
+                products: selectedItems.map((item) => item.product_id),
                 quantities: selectedItems.map((item) => item.quantity),
                 total_price: totalPrice,
                 payment_method: orderData.payment_method,
