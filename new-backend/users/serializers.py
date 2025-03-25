@@ -8,10 +8,11 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer()  # Nest product details inside each cart item
+    product_id = serializers.IntegerField(source='product.id', read_only=True)
 
     class Meta:
         model = CartItem
-        fields = ['id', 'product', 'quantity']
+        fields = ['id', 'product', 'product_id', 'quantity']
 
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, read_only=True)  # Serialize cart items
@@ -22,10 +23,11 @@ class CartSerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer()  # Nest product details inside each order item
+    product_id = serializers.IntegerField(source='product.id', read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product', 'quantity', 'price']
+        fields = ['id', 'product','product_id', 'quantity', 'price']
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)  # Serialize order items
@@ -37,3 +39,10 @@ class OrderSerializer(serializers.ModelSerializer):
             'payment_method', 'payment_status', 'contact_no', 'address', 'created_date'
         ]
         read_only_fields = ['id', 'total_price', 'delivery_status', 'payment_status', 'created_date']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        order = Order.objects.create(**validated_data)
+        for item_data in items_data:
+            OrderItem.objects.create(order=order, **item_data)
+        return order

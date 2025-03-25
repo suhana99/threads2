@@ -86,20 +86,36 @@ class UpdateCartView(APIView):
 def checkout(request):
     """ Handle order checkout """
     user = request.user
-    cart = Cart.objects.filter(user=user).first()
+    # Get products and quantities from the request data
+    products = request.data.get('products')
+    quantities = request.data.get('quantities')
+    
+    # Ensure products and quantities are provided and match
+    if not products or not quantities or len(products) != len(quantities):
+        return Response({"error": "Invalid data. Products and quantities must be provided and match."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not cart or not cart.items.exists():
-        return Response({"error": "Your cart is empty"}, status=status.HTTP_400_BAD_REQUEST)
+    # Calculate total price
+    total_price = 0
+    order_items = []
+    
+    for product_id, quantity in zip(products, quantities):
+        product = get_object_or_404(Product, id=product_id)
+        if quantity <= 0:
+            return Response({"error": "Quantity must be greater than 0"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        product_price = product.product_price
+        total_price += product_price * quantity
+
+        # Add order items for the order
+        order_items.append({
+            'product': product,
+            'quantity': quantity,
+            'price': product_price
+        })
 
     payment_method = request.data.get('payment_method')
     contact_no = request.data.get('contact_no')
     address = request.data.get('address')
-
-    if not payment_method or not contact_no or not address:
-        return Response({"error": "All fields are required"}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Calculate total price
-    total_price = sum(item.product.product_price * item.quantity for item in cart.items.select_related('product'))
 
     # Create Order
     order = Order.objects.create(
@@ -110,20 +126,17 @@ def checkout(request):
         address=address
     )
 
-    # Create Order Items
-    order_items = [
+    # Create Order Items from the order items data
+    order_item_objects = [
         OrderItem(
             order=order,
-            product=cart_item.product,
-            quantity=cart_item.quantity,
-            price=cart_item.product.product_price
+            product=order_item['product'],
+            quantity=order_item['quantity'],
+            price=order_item['price']
         )
-        for cart_item in cart.items.all()
+        for order_item in order_items
     ]
-    OrderItem.objects.bulk_create(order_items)  # Bulk insert to optimize performance
-
-    # Clear the cart after successful checkout
-    cart.items.all().delete()
+    OrderItem.objects.bulk_create(order_item_objects)  # Bulk insert
 
     return Response({
         "message": "Order placed successfully",
