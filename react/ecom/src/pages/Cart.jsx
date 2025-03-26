@@ -43,49 +43,65 @@ const Cart = ({ cartItems: initialCartItems }) => {
       });
   }, [initialCartItems]);
 
-  const handleRemoveItem = async (cartId) => {
+  const handleRemoveItem = async (cartItemId) => {  
     try {
+        const token = localStorage.getItem("access_token");
+        if (!token) return;
+
+        console.log("Deleting cart item with ID:", cartItemId);
+
+        const response = await axios.delete(`http://127.0.0.1:8000/carts/remove/${cartItemId}/`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.status === 200) {  
+            setCartItems(cartItems.filter((item) => item.id !== cartItemId));  
+        }
+    } catch (error) {
+        console.log("Failed to remove item with ID:", cartItemId);
+        console.error("Error:", error.response?.data || error.message);
+        setError("Failed to remove item.");
+    }
+};
+
+
+const handleQuantityChange = async (product_id, newQuantity, stock) => {
+  if (newQuantity < 1 || newQuantity > stock) return;
+
+  // Update the quantity locally
+  setCartItems((prevItems) =>
+    prevItems.map((item) =>
+      item.product_id === product_id ? { ...item, quantity: newQuantity } : item
+    )
+  );
+
+  // Update the quantity on the backend
+  await updateQuantityInBackend(product_id, newQuantity);
+};
+
+const updateQuantityInBackend = async (product_id, newQuantity) => {
+  try {
       const token = localStorage.getItem("access_token");
       if (!token) return;
 
-      const response = await axios.delete(`http://127.0.0.1:8000/carts/${cartId}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.status === 204 || response.status === 200) {
-        setCartItems(cartItems.filter((item) => item.product_id !== cartId)); ////////////////////////////////////////////////////////////////////
-      }
-    } catch (error) {
-      console.error("Error removing item:", error.response?.data || error.message);
-      setError("Failed to remove item.");
-    }
-  };
-
-  const handleQuantityChange = (product_id, newQuantity, stock) => {
-    if (newQuantity < 1 || newQuantity > stock) return;
-
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product_id === product_id ? { ...item, quantity: newQuantity } : item
-      )
-    );
-
-    updateQuantityInBackend(product_id, newQuantity);
-  };
-
-  const updateQuantityInBackend = async (id, newQuantity) => {
-    try {
-      const token = localStorage.getItem("access_token");
-      await axios.patch(
-        `http://127.0.0.1:8000/carts/${id}/`,
-        { quantity: newQuantity },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const response = await axios.patch(
+          `http://127.0.0.1:8000/carts/${product_id}/`, 
+          { quantity: newQuantity },
+          { headers: { Authorization: `Bearer ${token}` } }
       );
-    } catch (error) {
-      console.error("Error updating quantity:", error);
-      setError("Failed to update quantity.");
-    }
-  };
+
+      if (response.status === 200) {
+          console.log("Quantity updated successfully on the backend.");
+      }
+   } 
+  catch (error) {
+      // Log the full error to understand what went wrong
+      // console.error("Error updating quantity:", error);
+      // console.error("Error response:", error.response);  // Log the response if available
+      // setError("Failed to update quantity.");
+  }
+};
+
 
   const handleCheckout = () => {
     if (selectedItems.length === 0) {
@@ -105,11 +121,6 @@ const Cart = ({ cartItems: initialCartItems }) => {
     console.log("Final Selected Items before navigating:", selectedCartItems);
     navigate("/checkout", { state: { selectedItems: selectedCartItems } });
   };
-
-  {cartItems.map((item) => (
-    console.log("item.product_id",item.product_id),
-    console.log("item.product.pro_id",item.product_id)
-  ))}
 
   if (loading) return <p className="cart-message">Loading cart...</p>;
 
@@ -168,7 +179,6 @@ const Cart = ({ cartItems: initialCartItems }) => {
                       Price: ${totalPrice.toFixed(2)}
                     </h5>
 
-                    {/* Quantity Controls */}
                     <div className="quantity-controls">
                       <Button
                         className="btn-dark"
@@ -200,7 +210,7 @@ const Cart = ({ cartItems: initialCartItems }) => {
                     </div>
 
                     {/* Remove Button */}
-                    <Button className="btn-dark" onClick={() => handleRemoveItem(item.product_id)}>
+                    <Button className="btn-dark" onClick={() => handleRemoveItem(item.id)}>
                       <FaTrash />
                     </Button>
                   </div>
