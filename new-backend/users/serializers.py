@@ -24,10 +24,13 @@ class CartSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer()  # Nest product details inside each order item
     product_id = serializers.IntegerField(source='product.id', read_only=True)
+    product_name = serializers.CharField(source='product.product_name', read_only=True)
+    product_image = serializers.ImageField(source='product.product_image', read_only=True)
+    product_id = serializers.IntegerField(source='product.id', read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product','product_id', 'quantity', 'unit_price']
+        fields = ['id', 'product','product_id', 'quantity', 'unit_price','product_name','product_image']
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)  # Serialize order items

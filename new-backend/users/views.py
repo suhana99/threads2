@@ -81,6 +81,8 @@ class UpdateCartView(APIView):
         return Response({"error": "Invalid quantity"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+from django.db import transaction
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def checkout(request):
@@ -89,7 +91,7 @@ def checkout(request):
     # Get products and quantities from the request data
     products = request.data.get('products')
     quantities = request.data.get('quantities')
-    
+
     # Ensure products and quantities are provided and match
     if not products or not quantities or len(products) != len(quantities):
         return Response({"error": "Invalid data. Products and quantities must be provided and match."}, status=status.HTTP_400_BAD_REQUEST)
@@ -97,7 +99,8 @@ def checkout(request):
     # Calculate total price
     total_price = 0
     order_items = []
-    
+    cart_items_to_remove = []
+
     for product_id, quantity in zip(products, quantities):
         product = get_object_or_404(Product, id=product_id)
         if quantity <= 0:
@@ -105,13 +108,19 @@ def checkout(request):
         
         product_price = product.product_price
         total_price += product_price * quantity
-
+        order_price = quantity * product_price
         # Add order items for the order
         order_items.append({
             'product': product,
             'quantity': quantity,
-            'unit_price': product_price
+            'unit_price': product_price,
+            'order_price': order_price
         })
+
+        # Add the cart item to the removal list
+        cart_item = CartItem.objects.filter(cart__user=user, product=product).first()
+        if cart_item:
+            cart_items_to_remove.append(cart_item)
 
     payment_method = request.data.get('payment_method')
     contact_no = request.data.get('contact_no')
@@ -132,11 +141,26 @@ def checkout(request):
             order=order,
             product=order_item['product'],
             quantity=order_item['quantity'],
-            unit_price=order_item['unit_price']
+            unit_price=order_item['unit_price'],
+            order_price=order_item['order_price']
         )
         for order_item in order_items
     ]
     OrderItem.objects.bulk_create(order_item_objects)  # Bulk insert
+
+    # Update product stock
+    for order_item in order_items:
+        product = order_item['product']
+        new_stock = product.stock - order_item['quantity']
+        if new_stock < 0:
+            return Response({"error": f"Not enough stock for {product.product_name}"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        product.stock = new_stock
+        product.save()
+
+    # Remove cart items that were ordered
+    if cart_items_to_remove:
+        CartItem.objects.filter(id__in=[item.id for item in cart_items_to_remove]).delete()
 
     return Response({
         "message": "Order placed successfully",
@@ -144,49 +168,6 @@ def checkout(request):
         "total_price": total_price
     }, status=status.HTTP_201_CREATED)
 
-@login_required
-def order_form(request,product_id,cart_id):
-    user=request.user
-    product=Product.objects.get(id=product_id)
-    cart_items=Cart.objects.get(id=cart_id)
-
-    if request.method=="POST":
-        form=OrderForm(request.POST)
-        if form.is_valid():
-            # quantity=request.POST.get('quantity')
-            price=product.product_price
-            # total_price=int(quantity)*int(price)
-            contact_no=request.POST.get('contact_no')
-            address=request.POST.get('address')
-            payment_method=request.POST.get('payment_method')
-            payment_status=request.POST.get('payment_status')
-
-
-            #esma chai form create garera matra save garna milyo
-            order=Order.objects.create(
-                product=product,
-                user=user,
-                # quantity=quantity,
-                # total_price=total_price,
-                contact_no=contact_no,
-                payment_method=payment_method,
-                payment_status=payment_status
-            )
-            #models ma j cha tei naam
-            if order.payment_method=='Cash on Delivery':
-                cart_items.delete()
-                messages.add_message(request,messages.SUCCESS,'order placed successfully')
-                return redirect('/myorder')
-            elif order.payment_method=='Esewa':
-                return redirect(reverse('esewaform')+"?o_id="+str(order.id)+"&c_id="+str(cart_items.id))
-            else:
-                messages.add_message(request,messages.ERROR,'Failed to place order')
-                return render(request,'users/orderform.html',{'form':form})
-
-    context={
-        'form':OrderForm
-    }
-    return render(request,'users/orderform.html',context)
 
 import hmac
 import hashlib
@@ -252,15 +233,6 @@ def esewa_verify(request,order_id,cart_id):
         else:
             messages.add_message(request,messages.ERROR,'Failed to make payment')
             return redirect('/myorder')
-
-@login_required
-def my_order(request):
-    user=request.user
-    items=Order.objects.filter(user=user)
-    context={
-        'items':items
-    }
-    return render(request,'users/myorder.html',context)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

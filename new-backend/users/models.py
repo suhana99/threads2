@@ -27,10 +27,16 @@ class Order(models.Model):
         ('Esewa', 'Esewa'),
         ('Stripe', 'Stripe')
     )
+    DELIVERY = (
+        ('Pending','Pending'),
+        ('Packed','Packed'),
+        ('Out for delivery', 'Out for delivery'),
+        ('Delivered','Delivered')
+    )
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     total_price = models.IntegerField()
-    delivery_status = models.CharField(default='Pending', max_length=100)
+    delivery_status = models.CharField(default='Pending', max_length=100, choices=DELIVERY)
     payment_method = models.CharField(max_length=100, choices=PAYMENT)
     payment_status = models.BooleanField(default=False, null=True)
     contact_no = models.CharField(validators=[MinLengthValidator(9), MaxLengthValidator(10)], max_length=10)
@@ -42,4 +48,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     unit_price = models.IntegerField()  # Store product price at the time of order
+    order_price=models.IntegerField(default=False)
+
+
 
