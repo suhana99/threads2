@@ -110,7 +110,7 @@ def checkout(request):
         order_items.append({
             'product': product,
             'quantity': quantity,
-            'price': product_price
+            'unit_price': product_price
         })
 
     payment_method = request.data.get('payment_method')
@@ -132,7 +132,7 @@ def checkout(request):
             order=order,
             product=order_item['product'],
             quantity=order_item['quantity'],
-            price=order_item['price']
+            unit_price=order_item['unit_price']
         )
         for order_item in order_items
     ]

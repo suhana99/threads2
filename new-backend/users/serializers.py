@@ -27,7 +27,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product','product_id', 'quantity', 'price']
+        fields = ['id', 'product','product_id', 'quantity', 'unit_price']
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)  # Serialize order items

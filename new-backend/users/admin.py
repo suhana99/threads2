@@ -4,8 +4,8 @@ from .models import Order, OrderItem
 class OrderItemInline(admin.TabularInline):  # Inline for OrderItem
     model = OrderItem
     extra = 1  # Allows adding additional items in the order admin
-    fields = ('product', 'quantity', 'price')
-    readonly_fields = ('price',)  # Ensure price stays unchanged
+    fields = ('product', 'quantity', 'unit_price')
+    readonly_fields = ('unit_price',)  # Ensure price stays unchanged
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -16,6 +16,6 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('order', 'product', 'quantity', 'price')
+    list_display = ('order', 'product', 'quantity', 'unit_price')
     search_fields = ('order__user__username', 'product__name')
 
