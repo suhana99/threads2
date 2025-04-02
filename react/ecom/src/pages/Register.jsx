@@ -56,11 +56,11 @@ const Register = () => {
 
     return (
         <>
-        <div className="register__container">
-            <div className="register__form">
-                <div className="user">
-                    <img src={userIcon} alt="User Icon" />
-                    <h2 className="mb-5">Register</h2>
+        <div className="register__container mt-[-40px]">
+            <div className="register__form max-h-[650px] pb-4">
+                <div className="user flex align-items-center mt-3 mb-3">
+                    <img src={userIcon} alt="User Icon" className="max-h-[100px]" />
+                    <h3>Register</h3>
                 </div>
                 <Form onSubmit={handleRegister} className="space-y-4">
                     <FormGroup>
