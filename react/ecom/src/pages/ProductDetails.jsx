@@ -5,32 +5,39 @@ import { Card, CardBody, Container, Row, Col, Button, Form, FormGroup} from 'rea
 import { getCsrfToken } from "../utils/csrf";
 import '../styles/productcard.css'
 import '../styles/product-details.css'
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 
 
 const ProductCard = ({ product }) => {
+  useEffect(() => {
+    AOS.init({ duration: 800, once: false }); // Ensures animations trigger every time
+    AOS.refresh(); // Refresh AOS to detect new elements
+  }, []);
   return (
     <Link to={`/product/${product.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-      <Card>
-        <div className="product__img">
-          <img
-            src={product.product_image}
-            alt={product.product_name}
-            style={{ maxHeight: "350px", minHeight: "350px" }}
-          />
-        </div>
+      <div className="container mt-[50px]">
+      <div className="flex flex-wrap justify-center gap-10">
+        <div
+              data-aos="zoom-in"
+              className="rounded-2xl bg-white hover:bg-black/80 relative shadow-xl duration-300 group"
+            >
+      {/* <Card className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4"> */}
+      <div className="h-[290px] w-[250px]">
+                <img
+                  src={product.product_image}
+                  alt=""
+                  className="rounded-t-2xl w-100 h-100 block mx-auto transform -translate-y-20 group-hover:scale-105 duration-300 drop-shadow-md"
+                />
+              </div>
 
-        <CardBody>
-          <h1 className="product__title">{product.product_name}</h1>
+          <div className="p-2 pt-0 mt-[-50px] text-center w-[250px]">
 
-          <div className="mt-3 card__top d-flex align-items-center justify-content-between">
-            <span className="product__location d-flex align-items-center gap-1">
-              Category: {product.category_name}
-            </span>
-          </div>
+          <h1 className="text-xl font-bold">{product.product_name}</h1>
 
-          <p className="product__description mb-5 mt-3" style={{ maxHeight: "100px", minHeight: "100px" }}>
-            {product.product_description}
+          <p className="text-gray-500 duration-300 text-sm line-clamp-2">
+                  {product.product_description}
           </p>
 
           <div className="card__details d-flex justify-content-between">
@@ -39,12 +46,12 @@ const ProductCard = ({ product }) => {
 
           <div className="card__bottom d-flex align-items-center justify-content-between mt-3">
             <h5>${product.product_price}</h5>
-            <Link to={`/product/${product.id}`}>
-              <button className="booking__btn">View details</button>
-            </Link>
           </div>
-        </CardBody>
-      </Card>
+       </div>
+      {/* </Card> */}
+        </div>
+      </div>
+      </div>
     </Link>
   );
 };

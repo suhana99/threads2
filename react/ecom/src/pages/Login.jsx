@@ -5,6 +5,7 @@ import {Form, FormGroup, Button } from 'reactstrap';
 import userIcon from '../assets/images/user.png';
 import { toast } from 'react-toastify';
 
+
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -69,11 +70,11 @@ const Login = () => {
   
 
   return (
-    <div className="login__container mt-[-50px] mb-[-50px]">
-    <div className="login__form max-h-[550px]">
-        <div className="user flex align-items-center mb-3">
+    <div className="login__container mt-[-50px] mb-[-100px]">
+    <div className="grid grid-cols-1 login__form max-h-[550px]">
+        <div className="user flex align-items-center mb-3 mt-[-20px]">
             <img src={userIcon} alt="User Icon" className="max-h-[100px]"/>
-            <h2>Login</h2>
+            <h3>Login</h3>
         </div>
 
         <Form onSubmit={handleLogin} className="space-y-4">
