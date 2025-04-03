@@ -97,7 +97,7 @@ const Register = () => {
                 </Form>
 
                 <p className="text-center text-sm text-gray-600 mt-4">
-                    Already have an account? <a href="/login" className="text-yellow-500 hover:underline">Login</a>
+                    Already have an account? <a href="/login" className="text-[#242424] hover:underline">Login</a>
                 </p>
             </div>
         </div>

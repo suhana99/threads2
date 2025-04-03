@@ -28,12 +28,12 @@
 }
 
 .register__form input:focus {
-    border-color: #ffa500;
+    border-color: #353534;
     outline: none;
 }
 
 .auth__btn {
-    background: #ffb703 !important; 
+    background: #242424 !important; 
     color: white !important;
     width: 100%;
     padding: 10px;
@@ -44,5 +44,5 @@
 }
 
 .auth__btn:hover {
-    background: #e09b00 !important; 
+    background: #393734 !important; 
 }
